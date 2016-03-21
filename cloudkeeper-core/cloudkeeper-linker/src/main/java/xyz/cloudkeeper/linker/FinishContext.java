@@ -303,7 +303,7 @@ final class FinishContext {
     }
 
     @Nullable
-    Executable getExecutable(SimpleModuleDeclarationImpl declaration) throws LinkerException {
+    Executable getExecutable(SimpleModuleImpl declaration) throws LinkerException {
         try {
             return linkerOptions.getExecutableProvider().provideExecutable(declaration.getQualifiedName()).orElse(null);
         } catch (RuntimeStateProvisionException exception) {

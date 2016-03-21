@@ -124,10 +124,10 @@ abstract class AbstractFreezable {
     }
 
     /**
-     * Resolves the ports in all {@link ProxyModuleImpl} and {@link ConnectionImpl} instances.
+     * Resolves the ports in all {@link InvokeModuleImpl} and {@link ConnectionImpl} instances.
      *
      * <p>Just the {@link #finish(FinishContext)} method is not enough for the following reason. We need to make two
-     * passes over our descendants: First, add ports to all {@link ProxyModuleImpl} instances. Only then, we can finish
+     * passes over our descendants: First, add ports to all {@link InvokeModuleImpl} instances. Only then, we can finish
      * construction. Otherwise, we run into a cyclic dependency:
      * <ul><li>
      *     (a) determine apply-to-all connections in proxy module ->

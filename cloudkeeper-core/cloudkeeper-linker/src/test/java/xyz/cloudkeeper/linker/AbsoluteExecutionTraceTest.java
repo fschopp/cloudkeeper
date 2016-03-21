@@ -8,7 +8,7 @@ import xyz.cloudkeeper.linker.examples.Fibonacci;
 import xyz.cloudkeeper.linker.examples.Memory;
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.BareSimpleNameable;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.execution.MutableExecutionTraceTarget;
 import xyz.cloudkeeper.model.beans.execution.MutableOverride;
 import xyz.cloudkeeper.model.beans.execution.MutableOverrideTarget;
@@ -46,7 +46,7 @@ public class AbsoluteExecutionTraceTest {
     public void test() throws LinkerException {
         RuntimeAnnotatedExecutionTrace root = Linker.createAnnotatedExecutionTrace(
             ExecutionTrace.empty(),
-            new MutableProxyModule()
+            new MutableInvokeModule()
                 .setDeclaration(Fibonacci.class.getName()),
             Collections.singletonList(
                 new MutableOverride()
@@ -67,6 +67,7 @@ public class AbsoluteExecutionTraceTest {
             names(
                 fibRepository
                     .getElement(ModuleDeclarationImpl.class, Name.qualifiedName(Fibonacci.class.getName()))
+                    .getTemplate()
                     .getPorts()
             )
         );
@@ -103,6 +104,7 @@ public class AbsoluteExecutionTraceTest {
             names(
                 fibRepository
                     .getElement(ModuleDeclarationImpl.class, Name.qualifiedName(BinarySum.class.getName()))
+                    .getTemplate()
                     .getPorts()
             )
         );

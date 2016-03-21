@@ -9,18 +9,18 @@ import xyz.cloudkeeper.dsl.CompositeModulePlugin;
 import xyz.cloudkeeper.dsl.InputModule;
 import xyz.cloudkeeper.dsl.ModuleFactory;
 import xyz.cloudkeeper.model.CloudKeeperSerialization;
-import xyz.cloudkeeper.model.bare.element.module.BareCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareInputModule;
+import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
 import xyz.cloudkeeper.model.beans.StandardCopyOption;
 import xyz.cloudkeeper.model.beans.element.annotation.MutableAnnotation;
 import xyz.cloudkeeper.model.beans.element.annotation.MutableAnnotationEntry;
 import xyz.cloudkeeper.model.beans.element.module.MutableChildOutToParentOutConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableInPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableInputModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
 import xyz.cloudkeeper.model.beans.element.module.MutablePort;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
@@ -45,13 +45,13 @@ public class CompositeModuleTest {
     @Test
     public void testCompositeModule() throws Exception {
         // Create DSL and "manual" representation of same declaration
-        MutableCompositeModuleDeclaration actual = MutableCompositeModuleDeclaration.copyOfCompositeModuleDeclaration(
-            (BareCompositeModuleDeclaration) ModuleFactory.getDefault().loadDeclaration(CompositeWithInput.class),
+        MutableModuleDeclaration actual = MutableModuleDeclaration.copyOfModuleDeclaration(
+            (BareModuleDeclaration) ModuleFactory.getDefault().loadDeclaration(CompositeWithInput.class),
             StandardCopyOption.STRIP_LOCATION
         );
 
         CompositeWithInput dslModule = ModuleFactory.getDefault().create(CompositeWithInput.class);
-        MutableCompositeModuleDeclaration expected = new MutableCompositeModuleDeclaration()
+        MutableModuleDeclaration expected = new MutableModuleDeclaration()
             .setSimpleName(
                 CompositeWithInput.class.getName().substring(
                     CompositeWithInput.class.getPackage().getName().length() + 1

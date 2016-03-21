@@ -15,9 +15,11 @@ import javax.annotation.Nullable;
  * </li><li>
  *     {@link BareInputModule}
  * </li><li>
- *     {@link BareProxyModule}
+ *     {@link BareInvokeModule}
  * </li><li>
  *     {@link BareLoopModule}
+ * </li><li>
+ *     {@link BareSimpleModule}
  * </li></ul>
  *
  * This interface requires implementations to be neither mutable nor immutable.

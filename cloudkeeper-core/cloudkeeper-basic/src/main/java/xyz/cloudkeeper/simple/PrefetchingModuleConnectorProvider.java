@@ -14,7 +14,7 @@ import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInPort;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeOutPort;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimePort;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 
 import javax.annotation.Nullable;
@@ -43,7 +43,7 @@ public final class PrefetchingModuleConnectorProvider implements ModuleConnector
 
     @Override
     public CompletableFuture<ExtendedModuleConnector> provideModuleConnector(final StagingArea stagingArea) {
-        RuntimeProxyModule module = (RuntimeProxyModule) stagingArea.getAnnotatedExecutionTrace().getModule();
+        RuntimeInvokeModule module = (RuntimeInvokeModule) stagingArea.getAnnotatedExecutionTrace().getModule();
         List<? extends RuntimeInPort> inPorts = module.getInPorts();
         List<CompletableFuture<Object>> futures = new ArrayList<>(inPorts.size());
         for (RuntimeInPort inPort: module.getInPorts()) {
@@ -67,7 +67,7 @@ public final class PrefetchingModuleConnectorProvider implements ModuleConnector
 
     final class PrefetchingModuleConnector implements ExtendedModuleConnector {
         private final StagingArea stagingArea;
-        private final RuntimeProxyModule module;
+        private final RuntimeInvokeModule module;
         private final Object[] inputValues;
         private final Object monitor = new Object();
 
@@ -78,7 +78,7 @@ public final class PrefetchingModuleConnectorProvider implements ModuleConnector
 
         PrefetchingModuleConnector(StagingArea stagingArea, Object[] inputValues) {
             this.stagingArea = stagingArea;
-            module = (RuntimeProxyModule) stagingArea.getAnnotatedExecutionTrace().getModule();
+            module = (RuntimeInvokeModule) stagingArea.getAnnotatedExecutionTrace().getModule();
             this.inputValues = inputValues;
 
             outputValues = new AtomicReferenceArray<>(module.getOutPorts().size());

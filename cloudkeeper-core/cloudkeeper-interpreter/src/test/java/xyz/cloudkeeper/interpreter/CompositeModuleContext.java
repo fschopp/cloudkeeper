@@ -14,32 +14,32 @@ import xyz.cloudkeeper.model.beans.element.MutableQualifiedNamable;
 import xyz.cloudkeeper.model.beans.element.MutableSimpleNameable;
 import xyz.cloudkeeper.model.beans.element.module.MutableChildOutToParentOutConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableConnection;
+import xyz.cloudkeeper.model.beans.element.module.MutableDeclarableModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableIOPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableInPort;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableLoopModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableParentInToChildInConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableParentModule;
 import xyz.cloudkeeper.model.beans.element.module.MutablePort;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableShortCircuitConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableSiblingConnection;
-import xyz.cloudkeeper.model.beans.element.module.MutableSimpleModuleDeclaration;
+import xyz.cloudkeeper.model.beans.element.module.MutableSimpleModule;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModuleDeclaration;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeParentModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +53,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 /**
  * Class that encapsulates a {@link RuntimeRepository} and a {@link RuntimeAnnotatedExecutionTrace} representing a
@@ -65,7 +66,7 @@ public final class CompositeModuleContext implements Immutable {
     public static final SimpleName DECLARATION_NAME = SimpleName.identifier("TestModule");
 
     /**
-     * The simple name of the module under test (which is either a {@link RuntimeProxyModule} or a
+     * The simple name of the module under test (which is either a {@link RuntimeInvokeModule} or a
      * {@link xyz.cloudkeeper.model.runtime.element.module.RuntimeLoopModule}).
      */
     public static final SimpleName MODULE_NAME = SimpleName.identifier("testModule");
@@ -97,8 +98,8 @@ public final class CompositeModuleContext implements Immutable {
 
     public RuntimeParentModule getModule() {
         RuntimeModule module = executionTrace.getModule();
-        return module instanceof RuntimeProxyModule
-            ? ((RuntimeCompositeModuleDeclaration) ((RuntimeProxyModule) module).getDeclaration()).getTemplate()
+        return module instanceof RuntimeInvokeModule
+            ? ((RuntimeCompositeModuleDeclaration) ((RuntimeInvokeModule) module).getDeclaration()).getTemplate()
             : (RuntimeParentModule) module;
     }
 
@@ -165,7 +166,7 @@ public final class CompositeModuleContext implements Immutable {
 
         private final URI bundleIdentifier;
         private final Map<String, Map<String, PortType>> childrenPortMaps = new HashMap<>();
-        private final Map<String, MutableSimpleModuleDeclaration> moduleDeclarationMap = new LinkedHashMap<>();
+        private final Map<String, MutableModuleDeclaration> moduleDeclarationMap = new LinkedHashMap<>();
         private final List<MutableModule<?>> childModules = new ArrayList<>();
         private final Map<String, PortType> portMap = new LinkedHashMap<>();
         private final List<MutableConnection<?>> connections = new ArrayList<>();
@@ -182,7 +183,7 @@ public final class CompositeModuleContext implements Immutable {
          * <p>If the test module is inlined, it is either a
          * {@link xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModule} or
          * {@link xyz.cloudkeeper.model.runtime.element.module.RuntimeLoopModule}. Otherwise, the test module is
-         * a {@link RuntimeProxyModule} referencing a {@link RuntimeCompositeModuleDeclaration}.
+         * a {@link RuntimeInvokeModule} referencing a {@link RuntimeCompositeModuleDeclaration}.
          */
         public Builder setInlineTestModule(boolean inlineTestModule) {
             this.inlineTestModule = inlineTestModule;
@@ -218,11 +219,12 @@ public final class CompositeModuleContext implements Immutable {
                 childrenPortMaps.put(moduleName, new LinkedHashMap<>());
                 moduleDeclarationMap.put(
                     moduleName,
-                    new MutableSimpleModuleDeclaration()
+                    new MutableModuleDeclaration()
                         .setSimpleName(simpleName)
+                        .setTemplate(new MutableSimpleModule())
                 );
                 childModules.add(
-                    new MutableProxyModule()
+                    new MutableInvokeModule()
                         .setSimpleName(moduleName)
                         .setDeclaration(new MutableQualifiedNamable().setQualifiedName(qualifiedName))
                 );
@@ -236,7 +238,7 @@ public final class CompositeModuleContext implements Immutable {
 
             addChildModule(module);
             @Nullable Map<String, PortType> childPortMap = childrenPortMaps.get(module);
-            @Nullable MutableSimpleModuleDeclaration moduleDeclaration = moduleDeclarationMap.get(module);
+            @Nullable MutableModuleDeclaration moduleDeclaration = moduleDeclarationMap.get(module);
             assert childPortMap != null && moduleDeclaration != null;
             addPort(childPortMap, port, portType);
         }
@@ -402,9 +404,11 @@ public final class CompositeModuleContext implements Immutable {
             moduleDeclarationMap.entrySet().stream()
                 .map(
                     entry -> {
-                        MutableSimpleModuleDeclaration copiedDeclaration
-                            = MutableSimpleModuleDeclaration.copyOfSimpleModuleDeclaration(entry.getValue());
-                        copiedDeclaration.getPorts().addAll(ports(childrenPortMaps.get(entry.getKey())));
+                        MutableModuleDeclaration copiedDeclaration
+                            = MutableModuleDeclaration.copyOfModuleDeclaration(entry.getValue());
+                        @Nullable MutableSimpleModule module = (MutableSimpleModule) copiedDeclaration.getTemplate();
+                        assert module != null;
+                        module.getDeclaredPorts().addAll(ports(childrenPortMaps.get(entry.getKey())));
                         return copiedDeclaration;
                     }
                 )
@@ -426,9 +430,9 @@ public final class CompositeModuleContext implements Immutable {
                 assert !isLoopModule;
                 MutableCompositeModule typedParentModule = new MutableCompositeModule();
                 parentModule = typedParentModule;
-                testModule = new MutableProxyModule()
+                testModule = new MutableInvokeModule()
                     .setDeclaration(new MutableQualifiedNamable().setQualifiedName(PACKAGE.join(DECLARATION_NAME)));
-                MutableCompositeModuleDeclaration declaration = new MutableCompositeModuleDeclaration()
+                MutableModuleDeclaration declaration = new MutableModuleDeclaration()
                     .setSimpleName(DECLARATION_NAME)
                     .setTemplate(typedParentModule);
                 declarations.add(declaration);

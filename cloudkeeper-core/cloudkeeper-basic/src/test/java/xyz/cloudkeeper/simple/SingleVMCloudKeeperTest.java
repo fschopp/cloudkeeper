@@ -19,7 +19,7 @@ import xyz.cloudkeeper.model.api.WorkflowExecution;
 import xyz.cloudkeeper.model.api.staging.InstanceProvider;
 import xyz.cloudkeeper.model.api.util.RecursiveDeleteVisitor;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 
 import java.io.IOException;
@@ -104,7 +104,7 @@ public class SingleVMCloudKeeperTest {
             .setCleaningRequested(true)
             .build();
         WorkflowExecution workflowExecution = cloudKeeperEnvironment
-            .newWorkflowExecutionBuilder(new MutableProxyModule().setDeclaration(Fibonacci.class.getName()))
+            .newWorkflowExecutionBuilder(new MutableInvokeModule().setDeclaration(Fibonacci.class.getName()))
             .setBundleIdentifiers(Arrays.asList(SimpleRepository.BUNDLE_ID, FibonacciRepository.BUNDLE_ID))
             .setInputs(Collections.singletonMap(SimpleName.identifier("n"), (Object) 5))
             .start();

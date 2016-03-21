@@ -3,20 +3,20 @@ package xyz.cloudkeeper.linker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import xyz.cloudkeeper.model.LinkerException;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.beans.element.MutableBundle;
 import xyz.cloudkeeper.model.beans.element.MutablePackage;
 import xyz.cloudkeeper.model.beans.element.MutablePluginDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableChildOutToParentOutConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableInPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableParentInToChildInConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutablePort;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModuleDeclaration;
@@ -38,7 +38,7 @@ public class CyclicReferenceTest {
                 new MutablePackage()
                     .setQualifiedName("test")
                     .setDeclarations(Arrays.<MutablePluginDeclaration<?>>asList(
-                        new MutableCompositeModuleDeclaration()
+                        new MutableModuleDeclaration()
                             .setSimpleName("Composite1")
                             .setTemplate(
                                 new MutableCompositeModule()
@@ -51,7 +51,7 @@ public class CyclicReferenceTest {
                                             .setType(new MutableDeclaredType().setDeclaration(Object.class.getName()))
                                     ))
                                     .setModules(Collections.<MutableModule<?>>singletonList(
-                                        new MutableProxyModule()
+                                        new MutableInvokeModule()
                                             .setSimpleName("f")
                                             .setDeclaration("test.Composite2")
                                     ))
@@ -66,7 +66,7 @@ public class CyclicReferenceTest {
                                             .setToPort("out")
                                     ))
                             ),
-                        new MutableCompositeModuleDeclaration()
+                        new MutableModuleDeclaration()
                             .setSimpleName("Composite2")
                             .setTemplate(
                                 new MutableCompositeModule()
@@ -79,7 +79,7 @@ public class CyclicReferenceTest {
                                             .setType(new MutableDeclaredType().setDeclaration(Object.class.getName()))
                                     ))
                                     .setModules(Collections.<MutableModule<?>>singletonList(
-                                        new MutableProxyModule()
+                                        new MutableInvokeModule()
                                             .setSimpleName("g")
                                             .setDeclaration("test.Composite1")
                                     ))
@@ -109,11 +109,11 @@ public class CyclicReferenceTest {
         Assert.assertTrue(composite2Decl.getTemplate() != null);
 
         Assert.assertSame(
-            ((BareProxyModule) composite1Decl.getTemplate().getModule(identifier("f"))).getDeclaration(),
+            ((BareInvokeModule) composite1Decl.getTemplate().getModule(identifier("f"))).getDeclaration(),
             composite2Decl
         );
         Assert.assertSame(
-            ((BareProxyModule) composite2Decl.getTemplate().getModule(identifier("g"))).getDeclaration(),
+            ((BareInvokeModule) composite2Decl.getTemplate().getModule(identifier("g"))).getDeclaration(),
             composite1Decl
         );
     }

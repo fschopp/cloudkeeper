@@ -12,11 +12,6 @@ public interface BareCompositeModuleDeclaration extends BareModuleDeclaration {
     String NAME = "composite module declaration";
 
     /**
-     * Name of of the template element that every composite-module declaration implicitly contains.
-     */
-    String TEMPLATE_ELEMENT_NAME = "$template";
-
-    /**
      * Returns the template composite-module instance of this declaration.
      */
     @Nullable

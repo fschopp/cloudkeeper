@@ -8,7 +8,7 @@ import xyz.cloudkeeper.model.beans.element.module.MutableInputModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
 import xyz.cloudkeeper.model.beans.element.module.MutablePort;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableSiblingConnection;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 
@@ -52,7 +52,7 @@ public final class PascalTriangle {
                 String secondOutPortName = "one".equals(secondAncestorModule) ? BareInputModule.OUT_PORT_NAME : "sum";
                 String newModuleName = "pos_" + i + '_' + j;
                 children.add(
-                    new MutableProxyModule()
+                    new MutableInvokeModule()
                         .setSimpleName(newModuleName)
                         .setDeclaration(BinarySum.class.getName())
                 );

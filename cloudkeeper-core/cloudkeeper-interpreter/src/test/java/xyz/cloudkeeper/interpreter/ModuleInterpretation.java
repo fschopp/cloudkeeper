@@ -1,5 +1,8 @@
 package xyz.cloudkeeper.interpreter;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AllForOneStrategy;
@@ -25,17 +28,14 @@ import xyz.cloudkeeper.model.api.RuntimeContext;
 import xyz.cloudkeeper.model.api.staging.StagingArea;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModuleDeclaration;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeParentModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 import xyz.cloudkeeper.model.util.ImmutableList;
 import xyz.cloudkeeper.staging.MapStagingArea;
 import xyz.cloudkeeper.testkit.CallingThreadExecutor;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
@@ -50,9 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import javax.annotation.Nullable;
 
 final class ModuleInterpretation implements AutoCloseable {
     static final long DEFAULT_TIMEOUT_MILLIS = 1000;
@@ -165,13 +163,9 @@ final class ModuleInterpretation implements AutoCloseable {
     }
 
     private static RuntimeModule resolveModule(RuntimeModule module) {
-        if (module instanceof RuntimeProxyModule) {
-            RuntimeModuleDeclaration declaration = ((RuntimeProxyModule) module).getDeclaration();
-            if (declaration instanceof RuntimeCompositeModuleDeclaration) {
-                return ((RuntimeCompositeModuleDeclaration) declaration).getTemplate();
-            }
-        }
-        return module;
+        return module instanceof RuntimeInvokeModule
+            ? ((RuntimeInvokeModule) module).getDeclaration().getTemplate()
+            : module;
     }
 
     @Override

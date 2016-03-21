@@ -11,12 +11,12 @@ import xyz.cloudkeeper.marshaling.MarshalingTreeNode.RawObjectNode;
 import xyz.cloudkeeper.model.api.Marshaler;
 import xyz.cloudkeeper.model.api.staging.StagingArea;
 import xyz.cloudkeeper.model.api.staging.StagingAreaProvider;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.immutable.element.Index;
 import xyz.cloudkeeper.model.immutable.element.Key;
 import xyz.cloudkeeper.model.immutable.element.NoKey;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.element.serialization.RuntimeByteSequence;
 import xyz.cloudkeeper.model.runtime.element.serialization.RuntimeSerializationNode;
@@ -371,8 +371,8 @@ public abstract class AbstractStagingArea implements StagingArea {
             // A non-empty empty execution trace is only allowed if the execution trace represents a simple module!
             if (executionTrace.getType() == RuntimeExecutionTrace.Type.MODULE) {
                 RuntimeModule module = executionTrace.getModule();
-                if (module instanceof RuntimeProxyModule
-                        && ((BareProxyModule) module).getDeclaration() instanceof RuntimeSimpleModuleDeclaration) {
+                if (module instanceof RuntimeInvokeModule
+                        && ((BareInvokeModule) module).getDeclaration() instanceof RuntimeSimpleModuleDeclaration) {
                     // OK, all is good.
                     return;
                 }

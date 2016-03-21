@@ -40,7 +40,7 @@ public interface RuntimePort extends BarePort, RuntimeAnnotatedConstruct, Runtim
      */
     @Override
     @Nonnull
-    RuntimePortContainer getEnclosingElement();
+    RuntimeModule getEnclosingElement();
 
     /**
      * Returns the index of this port in the port list of the enclosing element.
@@ -48,7 +48,7 @@ public interface RuntimePort extends BarePort, RuntimeAnnotatedConstruct, Runtim
      * <p>The index returned by this method is equal to the result of
      * {@code getEnclosingElement().getPorts().indexOf(port)}.
      *
-     * @see RuntimePortContainer#getPorts()
+     * @see RuntimeModule#getPorts()
      *
      * @return the index of this port in the port list of the enclosing element
      */

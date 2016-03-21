@@ -5,6 +5,7 @@ import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.annotation.RuntimeAnnotation;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInPort;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeOutPort;
 import xyz.cloudkeeper.model.runtime.element.serialization.RuntimeSerializationDeclaration;
@@ -29,7 +30,7 @@ public interface RuntimeAnnotatedExecutionTrace extends RuntimeExecutionTrace {
      * the last element of this execution trace does not represent a module (recursive definition).
      *
      * <p>If the current module is a proxy module referencing a composite module declaration, then a
-     * {@link xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule} instance is returned by this
+     * {@link RuntimeInvokeModule} instance is returned by this
      * method.
      *
      * @return Module represented by the last element of this execution trace, or the module of the parent trace if the

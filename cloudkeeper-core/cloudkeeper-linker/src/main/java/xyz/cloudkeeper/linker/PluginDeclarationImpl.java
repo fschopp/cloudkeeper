@@ -19,8 +19,9 @@ abstract class PluginDeclarationImpl extends AnnotatedConstructImpl implements R
     @Nullable private volatile Name qualifiedName;
     @Nullable private volatile PackageImpl enclosingPackage;
 
-    PluginDeclarationImpl(BarePluginDeclaration original, CopyContext parentContext) throws LinkerException {
+    PluginDeclarationImpl(@Nullable  BarePluginDeclaration original, CopyContext parentContext) throws LinkerException {
         super(original, parentContext);
+        assert original != null;
         simpleName = Preconditions.requireNonNull(
             original.getSimpleName(), getCopyContext().newContextForProperty("simpleName"));
     }
@@ -32,7 +33,7 @@ abstract class PluginDeclarationImpl extends AnnotatedConstructImpl implements R
         @Override
         public Try<ModuleDeclarationImpl> visit(BareModuleDeclaration original, @Nullable CopyContext parentContext) {
             assert parentContext != null;
-            return Try.run(() -> ModuleDeclarationImpl.copyOf(original, parentContext));
+            return Try.run(() -> new ModuleDeclarationImpl(original, parentContext));
         }
 
         @Override

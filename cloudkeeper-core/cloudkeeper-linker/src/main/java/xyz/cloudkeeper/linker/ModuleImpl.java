@@ -2,23 +2,25 @@ package xyz.cloudkeeper.linker;
 
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.module.BareCompositeModule;
-import xyz.cloudkeeper.model.bare.element.module.BareCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareInputModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.bare.element.module.BareLoopModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
+import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareSimpleModule;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
 import xyz.cloudkeeper.model.runtime.element.module.TypeRelationship;
+import xyz.cloudkeeper.model.util.ImmutableList;
 
 import javax.annotation.Nullable;
 
 /**
  * Abstract module instance.
  */
-abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModule, IPortContainerImpl {
+abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModule, IElementImpl {
     @Nullable private final SimpleName name;
     private final int index;
 
@@ -76,19 +78,37 @@ abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModul
 
         @Override
         @Nullable
-        public Try<ProxyModuleImpl> visitLinkedModule(BareProxyModule linkedModule,
+        public Try<InvokeModuleImpl> visitLinkedModule(BareInvokeModule linkedModule,
                 @Nullable CopyContext parentContext) {
             assert parentContext != null;
-            return Try.run(() -> new ProxyModuleImpl(linkedModule, parentContext, index));
+            return Try.run(() -> new InvokeModuleImpl(linkedModule, parentContext, index));
+        }
+
+        @Nullable
+        @Override
+        public Try<? extends ModuleImpl> visitSimpleModule(BareSimpleModule simpleModule,
+                @Nullable CopyContext parentContext) {
+            assert parentContext != null;
+            return Try.run(() -> new SimpleModuleImpl(simpleModule, parentContext, index));
         }
     }
 
-    static ModuleImpl copyOf(BareModule original, CopyContext parentContext, int index) throws LinkerException {
+    static ModuleImpl copyOf(@Nullable BareModule original, CopyContext parentContext, int index)
+            throws LinkerException {
         Preconditions.requireNonNull(original, parentContext);
         @Nullable Try<? extends ModuleImpl> copyTry = original.accept(new CopyVisitor(index), parentContext);
         assert copyTry != null;
         return copyTry.get();
     }
+
+    @Override
+    public abstract ImmutableList<PortImpl> getPorts();
+
+    @Override
+    public abstract ImmutableList<IInPortImpl> getInPorts();
+
+    @Override
+    public abstract ImmutableList<IOutPortImpl> getOutPorts();
 
     @Override
     @Nullable
@@ -150,11 +170,14 @@ abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModul
         if (localEnclosingElement instanceof ParentModuleImpl) {
             assert name != null;
             qualifiedName = localEnclosingElement.getQualifiedName().join(name);
-        } else if (localEnclosingElement instanceof CompositeModuleDeclarationImpl) {
+        } else if (localEnclosingElement instanceof ModuleDeclarationImpl) {
             qualifiedName = localEnclosingElement.getQualifiedName()
-                .join(SimpleName.identifier(BareCompositeModuleDeclaration.TEMPLATE_ELEMENT_NAME));
+                .join(SimpleName.identifier(BareModuleDeclaration.TEMPLATE_ELEMENT_NAME));
         } else {
-            qualifiedName = SimpleName.identifier(BareCompositeModuleDeclaration.TEMPLATE_ELEMENT_NAME);
+            qualifiedName = SimpleName.identifier(BareModuleDeclaration.TEMPLATE_ELEMENT_NAME);
         }
+        finishModule(context);
     }
+
+    abstract void finishModule(FinishContext context) throws LinkerException;
 }

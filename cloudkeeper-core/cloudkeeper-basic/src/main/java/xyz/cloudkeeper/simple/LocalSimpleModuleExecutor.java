@@ -16,7 +16,7 @@ import xyz.cloudkeeper.model.api.staging.StagingArea;
 import xyz.cloudkeeper.model.api.staging.StagingAreaProvider;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 
@@ -153,7 +153,7 @@ public final class LocalSimpleModuleExecutor implements SimpleModuleExecutor {
         return Futures.thenComposeWithResource(
             moduleConnectorProvider.provideModuleConnector(stagingArea),
             moduleConnector -> {
-                RuntimeProxyModule simpleModule = (RuntimeProxyModule) moduleConnector.getExecutionTrace().getModule();
+                RuntimeInvokeModule simpleModule = (RuntimeInvokeModule) moduleConnector.getExecutionTrace().getModule();
                 Executable executable = ((RuntimeSimpleModuleDeclaration) simpleModule.getDeclaration()).toExecutable();
                 return Futures
                     .supplyAsync(() -> runExecutable(intermediateResults, executable, moduleConnector), executor)

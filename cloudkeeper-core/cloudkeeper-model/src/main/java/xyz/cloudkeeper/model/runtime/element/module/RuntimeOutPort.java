@@ -10,7 +10,7 @@ public interface RuntimeOutPort extends RuntimePort, BareOutPort {
      * Returns the index of this out-port in the list of all its enclosing module's out-ports.
      *
      * <p>The result of this method is the index of this out-port in the {@link List} that is obtained by calling
-     * {@link RuntimePortContainer#getOutPorts()} on {@link #getEnclosingElement()}).
+     * {@link RuntimeModule#getOutPorts()} on {@link #getEnclosingElement()}).
      *
      * @return index of this out-port in the list of all its enclosing module's out-ports
      */

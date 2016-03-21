@@ -78,8 +78,6 @@ public final class LinkerOptions {
          * Sets the executable provider used to resolve qualified names of simple-module declaration into
          * {@link xyz.cloudkeeper.model.api.Executable} instances.
          *
-         * <p>This option is only relevant for linker method {@link Linker#createRepository(List, LinkerOptions)}.
-         *
          * <p>If an executable provider does not return an {@link xyz.cloudkeeper.model.api.Executable} instance
          * for a given name, then calls to
          * {@link xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration#toExecutable()} for

@@ -7,7 +7,7 @@ import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInPort;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 
 import java.util.Arrays;
@@ -53,7 +53,7 @@ public class CompositeModuleContextTest {
 
         RuntimeAnnotatedExecutionTrace executionTrace = context.getExecutionTrace();
         RuntimeCompositeModule compositeModule = (
-                (RuntimeCompositeModuleDeclaration) ((RuntimeProxyModule) executionTrace.getModule()).getDeclaration()
+                (RuntimeCompositeModuleDeclaration) ((RuntimeInvokeModule) executionTrace.getModule()).getDeclaration()
             ).getTemplate();
         Assert.assertEquals(
             compositeModule.getInPorts().stream()

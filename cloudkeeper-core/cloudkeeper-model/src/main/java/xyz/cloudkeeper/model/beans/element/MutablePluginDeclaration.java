@@ -62,8 +62,7 @@ public abstract class MutablePluginDeclaration<D extends MutablePluginDeclaratio
         INSTANCE;
 
         @Override
-        public MutableModuleDeclaration<?> visit(BareModuleDeclaration declaration,
-                @Nullable CopyOption[] copyOptions) {
+        public MutableModuleDeclaration visit(BareModuleDeclaration declaration, @Nullable CopyOption[] copyOptions) {
             assert copyOptions != null;
             return MutableModuleDeclaration.copyOfModuleDeclaration(declaration, copyOptions);
         }

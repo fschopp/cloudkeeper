@@ -5,7 +5,8 @@ import xyz.cloudkeeper.model.bare.element.module.BareInputModule;
 import xyz.cloudkeeper.model.bare.element.module.BareLoopModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
+import xyz.cloudkeeper.model.bare.element.module.BareSimpleModule;
 import xyz.cloudkeeper.model.beans.CopyOption;
 import xyz.cloudkeeper.model.beans.element.MutableAnnotatedConstruct;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
@@ -19,7 +20,7 @@ import java.util.Objects;
 import static xyz.cloudkeeper.model.immutable.element.SimpleName.identifier;
 
 @XmlSeeAlso({
-    MutableCompositeModule.class, MutableInputModule.class, MutableLoopModule.class, MutableProxyModule.class
+    MutableCompositeModule.class, MutableInputModule.class, MutableLoopModule.class, MutableInvokeModule.class
 })
 @XmlType(propOrder = { "simpleName", "declaredAnnotations" })
 public abstract class MutableModule<D extends MutableModule<D>>
@@ -74,9 +75,15 @@ public abstract class MutableModule<D extends MutableModule<D>>
         }
 
         @Override
-        public MutableModule<?> visitLinkedModule(BareProxyModule proxyModule, @Nullable CopyOption[] copyOptions) {
+        public MutableModule<?> visitLinkedModule(BareInvokeModule proxyModule, @Nullable CopyOption[] copyOptions) {
             assert copyOptions != null;
-            return MutableProxyModule.copyOfProxyModule(proxyModule, copyOptions);
+            return MutableInvokeModule.copyOfProxyModule(proxyModule, copyOptions);
+        }
+
+        @Override
+        public MutableModule<?> visitSimpleModule(BareSimpleModule proxyModule, @Nullable CopyOption[] copyOptions) {
+            assert copyOptions != null;
+            return MutableSimpleModule.copyOfSimpleModule(proxyModule, copyOptions);
         }
     }
 

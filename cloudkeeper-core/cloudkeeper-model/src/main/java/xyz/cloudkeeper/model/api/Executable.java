@@ -1,12 +1,13 @@
 package xyz.cloudkeeper.model.api;
 
+import xyz.cloudkeeper.model.bare.element.BareReferenceable;
+
 /**
- * Functional interface for processing the user-defined code that defines a simple module.
+ * Interface for processing the user-defined code that defines a simple module.
  *
  * <p>Implementations are required to be thread-safe and are encouraged to be immutable.
  */
-@FunctionalInterface
-public interface Executable {
+public interface Executable extends BareReferenceable {
     /**
      * Executes the simple module represented by this executable.
      *

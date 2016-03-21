@@ -10,7 +10,7 @@ public interface RuntimeInPort extends RuntimePort, BareInPort {
      * Returns the index of this in-port in the list of all its enclosing module's in-ports.
      *
      * <p>The result of this method is the index of this in-port in the {@link List} that is obtained by calling
-     * {@link RuntimePortContainer#getInPorts()} on {@link #getEnclosingElement()}).
+     * {@link RuntimeModule#getInPorts()} on {@link #getEnclosingElement()}).
      *
      * @return index of this in-port in the list of all its enclosing module's in-ports
      */

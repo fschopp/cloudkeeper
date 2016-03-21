@@ -43,7 +43,7 @@ abstract class DSLParentModule<D extends DSLParentModule<D>> extends Module<D> i
      * List of all child modules (as {@link Module} references).
      *
      * Note that {@code dslModules} contains {@link Module} instances where {@link #modules} would contain a
-     * {@link DSLProxyModule} instance.
+     * {@link DSLInvokeModule} instance.
      */
     private final List<Module<?>> dslModules = new ArrayList<>();
 
@@ -88,19 +88,19 @@ abstract class DSLParentModule<D extends DSLParentModule<D>> extends Module<D> i
     private final Map<ValueAndType<?>, InputModule<?>> valuesToInputModules = new LinkedHashMap<>();
 
     /**
-     * The {@link DSLProxyModule} that serves as a proxy for this module in all
+     * The {@link DSLInvokeModule} that serves as a proxy for this module in all
      * {@link xyz.cloudkeeper.model.bare} interfaces.
      *
      * If null, then this module is either a top-level module, or it is anonymous (does not have a declaration).
      */
-    @Nullable private final DSLProxyModule linkedModule;
+    @Nullable private final DSLInvokeModule linkedModule;
 
 
     DSLParentModule() {
         // A composite module that does not have a CompositeModulePlugin annotation is an anonymous module.
         linkedModule
             = (getDSLParent() != null && getModuleClass().isAnnotationPresent(CompositeModulePlugin.class))
-                ? new DSLProxyModule(this)
+                ? new DSLInvokeModule(this)
                 : null;
     }
 

@@ -9,7 +9,7 @@ import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableInputModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableSiblingConnection;
 import xyz.cloudkeeper.model.beans.element.serialization.MutableSerializationNode;
 import xyz.cloudkeeper.model.beans.element.serialization.MutableSerializationRoot;
@@ -42,7 +42,7 @@ public class MutableExecutableTest {
                                             new MutableSerializedString().setString("0")
                                         ))
                                 ),
-                            new MutableProxyModule()
+                            new MutableInvokeModule()
                                 .setSimpleName("sum")
                                 .setDeclaration("test.Sum")
                         ))

@@ -1,27 +1,29 @@
 package xyz.cloudkeeper.dsl;
 
-import xyz.cloudkeeper.dsl.exception.MissingAnnotationException;
 import xyz.cloudkeeper.model.api.ModuleConnector;
-import xyz.cloudkeeper.model.bare.element.BareQualifiedNameable;
 import xyz.cloudkeeper.model.bare.element.module.BareInPort;
+import xyz.cloudkeeper.model.bare.element.module.BareModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
 import xyz.cloudkeeper.model.bare.element.module.BareOutPort;
 import xyz.cloudkeeper.model.bare.element.module.BarePortVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
-import xyz.cloudkeeper.model.beans.element.MutableQualifiedNamable;
-import xyz.cloudkeeper.model.immutable.element.Name;
+import xyz.cloudkeeper.model.bare.element.module.BareSimpleModule;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.List;
+import javax.annotation.Nullable;
 
-public abstract class SimpleModule<D extends SimpleModule<D>> extends Module<D> implements BareProxyModule {
+public abstract class SimpleModule<D extends SimpleModule<D>> extends Module<D> implements BareSimpleModule {
+    @Nullable private final DSLInvokeModule linkedModule;
+
     protected SimpleModule() {
-        if (!getModuleClass().isAnnotationPresent(SimpleModulePlugin.class)) {
-            throw new MissingAnnotationException(getModuleClass(), SimpleModulePlugin.class, getLocation());
-        }
+        // A composite module that does not have SimpleModulePlugin annotation is an anonymous module.
+        linkedModule
+            = (getDSLParent() != null && getModuleClass().isAnnotationPresent(SimpleModulePlugin.class))
+                ? new DSLInvokeModule(this)
+                : null;
 
         createPorts(new PortVisitor() {
             @Override
@@ -40,7 +42,14 @@ public abstract class SimpleModule<D extends SimpleModule<D>> extends Module<D> 
 
     @Override
     public final String toString() {
-        return BareProxyModule.Default.toString(this);
+        return BareSimpleModule.Default.toString(this);
+    }
+
+    @Override
+    final BareModule getBareModule() {
+        return linkedModule != null
+            ? linkedModule
+            : this;
     }
 
     /**
@@ -100,13 +109,7 @@ public abstract class SimpleModule<D extends SimpleModule<D>> extends Module<D> 
 
     @Override
     public final <T, P> T accept(BareModuleVisitor<T, P> visitor, P parameter) {
-        return visitor.visitLinkedModule(this, parameter);
-    }
-
-    @Override
-    public final BareQualifiedNameable getDeclaration() {
-        return new MutableQualifiedNamable()
-            .setQualifiedName(Name.qualifiedName(getModuleClass().getName()));
+        return visitor.visitSimpleModule(this, parameter);
     }
 
     /**

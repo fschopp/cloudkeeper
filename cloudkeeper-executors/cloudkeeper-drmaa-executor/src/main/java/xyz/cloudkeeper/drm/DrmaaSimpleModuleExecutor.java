@@ -21,7 +21,7 @@ import xyz.cloudkeeper.model.api.staging.InstanceProvisionException;
 import xyz.cloudkeeper.model.api.util.RecursiveDeleteVisitor;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 import net.florianschoppmann.java.futures.Futures;
 import xyz.cloudkeeper.model.util.ImmutableList;
@@ -438,7 +438,7 @@ public final class DrmaaSimpleModuleExecutor implements SimpleModuleExecutor {
     private SubmittedJob submitJob(RuntimeStateProvider runtimeStateProvider, RuntimeContext runtimeContext,
             Timing timing) throws IOException, DrmaaException, InstanceProvisionException, LinkerException {
         RuntimeAnnotatedExecutionTrace executionTrace = runtimeStateProvider.provideExecutionTrace(runtimeContext);
-        RuntimeProxyModule module = (RuntimeProxyModule) executionTrace.getModule();
+        RuntimeInvokeModule module = (RuntimeInvokeModule) executionTrace.getModule();
         String declarationName = module.getDeclaration().getQualifiedName().toString();
         Path ioPath = Files.createTempDirectory(jobIOBasePath, declarationName);
         timing.ioPath = ioPath;

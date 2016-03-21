@@ -5,17 +5,17 @@ import xyz.cloudkeeper.model.bare.element.module.BareInputModule;
 import xyz.cloudkeeper.model.bare.element.module.BareLoopModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableChildOutToParentOutConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableIOPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableInPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableInputModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableLoopModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableParentInToChildInConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutablePort;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableShortCircuitConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutableSiblingConnection;
 import xyz.cloudkeeper.model.beans.element.serialization.MutableSerializationNode;
@@ -80,13 +80,13 @@ public final class Fibonacci {
                             .setOutPortType(integer)
                             .setRaw(one),
 
-                        new MutableProxyModule()
+                        new MutableInvokeModule()
                             .setSimpleName("sum")
                             .setDeclaration(BinarySum.class.getName()),
-                        new MutableProxyModule()
+                        new MutableInvokeModule()
                             .setSimpleName("decr")
                             .setDeclaration(Decrease.class.getName()),
-                        new MutableProxyModule()
+                        new MutableInvokeModule()
                             .setSimpleName("gt")
                             .setDeclaration(GreaterThan.class.getName())
                     ))
@@ -139,8 +139,8 @@ public final class Fibonacci {
             ));
     }
 
-    public static MutableCompositeModuleDeclaration declaration() {
-        return new MutableCompositeModuleDeclaration()
+    public static MutableModuleDeclaration declaration() {
+        return new MutableModuleDeclaration()
             .setSimpleName(Fibonacci.class.getSimpleName())
             .setTemplate(template());
     }

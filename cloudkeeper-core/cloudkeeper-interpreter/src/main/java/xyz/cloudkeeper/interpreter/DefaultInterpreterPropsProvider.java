@@ -12,7 +12,7 @@ import xyz.cloudkeeper.model.runtime.element.module.RuntimeLoopModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleDeclarationVisitor;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleVisitor;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeExecutionTrace;
 import xyz.cloudkeeper.model.util.ImmutableList;
@@ -109,7 +109,7 @@ enum DefaultInterpreterPropsProvider implements InterpreterPropsProvider {
                 }
 
                 @Override
-                public Creator<UntypedActor> visit(final RuntimeProxyModule module, @Nullable Void ignored) {
+                public Creator<UntypedActor> visit(final RuntimeInvokeModule module, @Nullable Void ignored) {
                     requireEmptyExecutionTraceOrModuleType(stagingArea.getAnnotatedExecutionTrace());
                     return module.getDeclaration().accept(
                         new RuntimeModuleDeclarationVisitor<Creator<UntypedActor>, Void>() {

@@ -18,11 +18,10 @@ import java.util.Objects;
 
 @XmlType(propOrder = { "declaredPorts", "modules", "connections" })
 public abstract class MutableParentModule<D extends MutableParentModule<D>>
-        extends MutableModule<D>
+        extends MutableDeclarableModule<D>
         implements BareParentModule {
     private static final long serialVersionUID = 4744751589966311180L;
 
-    private final ArrayList<MutablePort<?>> declaredPorts = new ArrayList<>();
     private final ArrayList<MutableModule<?>> modules = new ArrayList<>();
     private final ArrayList<MutableConnection<?>> connections = new ArrayList<>();
 
@@ -31,9 +30,6 @@ public abstract class MutableParentModule<D extends MutableParentModule<D>>
     MutableParentModule(BareParentModule original, CopyOption[] copyOptions) {
         super(original, copyOptions);
 
-        for (BarePort port: original.getDeclaredPorts()) {
-            declaredPorts.add(MutablePort.copyOfPort(port, copyOptions));
-        }
         for (BareModule module: original.getModules()) {
             modules.add(MutableModule.copyOfModule(module, copyOptions));
         }
@@ -50,30 +46,15 @@ public abstract class MutableParentModule<D extends MutableParentModule<D>>
         }
 
         MutableParentModule<?> other = (MutableParentModule<?>) otherObject;
-        return Objects.equals(declaredPorts, other.declaredPorts)
-            && Objects.equals(modules, other.modules)
+        return Objects.equals(modules, other.modules)
             && Objects.equals(connections, other.connections);
     }
 
     @Override
     public int hashCode() {
-        return 31 * super.hashCode() + Objects.hash(declaredPorts, modules, connections);
+        return 31 * super.hashCode() + Objects.hash(modules, connections);
     }
 
-    @XmlElementWrapper(name = "ports")
-    @XmlElementRef
-    @Override
-    public final List<MutablePort<?>> getDeclaredPorts() {
-        return declaredPorts;
-    }
-
-    public D setDeclaredPorts(List<MutablePort<?>> declaredPorts) {
-        Objects.requireNonNull(declaredPorts);
-        List<MutablePort<?>> backup = new ArrayList<>(declaredPorts);
-        this.declaredPorts.clear();
-        this.declaredPorts.addAll(backup);
-        return self();
-    }
 
     @XmlElementWrapper(name = "modules")
     @XmlElementRef

@@ -98,7 +98,7 @@ final class InputModuleImpl extends ModuleImpl implements RuntimeInputModule {
 
     @Override
     public ImmutableList<PortImpl> getPorts() {
-        return ImmutableList.<PortImpl>of(outPort);
+        return ImmutableList.of(outPort);
     }
 
     @Override
@@ -108,7 +108,7 @@ final class InputModuleImpl extends ModuleImpl implements RuntimeInputModule {
 
     @Override
     public ImmutableList<IOutPortImpl> getOutPorts() {
-        return ImmutableList.<IOutPortImpl>of(outPort);
+        return ImmutableList.of(outPort);
     }
 
     @Override
@@ -139,6 +139,9 @@ final class InputModuleImpl extends ModuleImpl implements RuntimeInputModule {
 
     @Override
     void preProcessFreezable(FinishContext context) { }
+
+    @Override
+    void finishModule(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) throws LinkerException {

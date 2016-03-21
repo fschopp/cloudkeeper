@@ -3,11 +3,11 @@ package xyz.cloudkeeper.linker;
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.RuntimeElement;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleVisitor;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
 import javax.annotation.Nullable;
@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-final class ProxyModuleImpl extends ModuleImpl implements RuntimeProxyModule {
+final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
     private final NameReference declarationReference;
 
     @Nullable private volatile ModuleDeclarationImpl moduleDeclaration;
@@ -27,7 +27,7 @@ final class ProxyModuleImpl extends ModuleImpl implements RuntimeProxyModule {
     @Nullable private volatile ImmutableList<IInPortImpl> inPorts;
     @Nullable private volatile ImmutableList<IOutPortImpl> outPorts;
 
-    ProxyModuleImpl(BareProxyModule original, CopyContext parentContext, int index) throws LinkerException {
+    InvokeModuleImpl(BareInvokeModule original, CopyContext parentContext, int index) throws LinkerException {
         super(original, parentContext, index);
         declarationReference
             = new NameReference(original.getDeclaration(), getCopyContext().newContextForProperty("declaration"));
@@ -35,7 +35,7 @@ final class ProxyModuleImpl extends ModuleImpl implements RuntimeProxyModule {
 
     @Override
     public String toString() {
-        return BareProxyModule.Default.toString(this);
+        return BareInvokeModule.Default.toString(this);
     }
 
     @Override
@@ -148,7 +148,7 @@ final class ProxyModuleImpl extends ModuleImpl implements RuntimeProxyModule {
 
         CopyContext copyContext = getCopyContext();
         // Add missing ports. At link time, instances of this package may not yet be fully constructed, and we can
-        // therefore not rely on ModuleDeclarationImpl#getPorts(). Instead, ModuleDeclarationImpl provides
+        // therefore not rely on ModuleImpl#getPorts(). Instead, ModuleDeclarationImpl provides
         // getBarePorts() for this purpose.
         PortAccumulationState state = new PortAccumulationState();
         Map<SimpleName, PortImpl> newPortMap = new LinkedHashMap<>();
@@ -167,6 +167,9 @@ final class ProxyModuleImpl extends ModuleImpl implements RuntimeProxyModule {
         inPorts = ImmutableList.copyOf(state.getInPorts());
         outPorts = ImmutableList.copyOf(state.getOutPorts());
     }
+
+    @Override
+    void finishModule(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

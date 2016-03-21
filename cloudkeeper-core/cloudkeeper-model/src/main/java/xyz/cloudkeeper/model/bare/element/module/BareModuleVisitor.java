@@ -28,5 +28,11 @@ public interface BareModuleVisitor<T, P> {
      * Visits a proxy module.
      */
     @Nullable
-    T visitLinkedModule(BareProxyModule linkedModule, @Nullable P parameter);
+    T visitLinkedModule(BareInvokeModule linkedModule, @Nullable P parameter);
+
+    /**
+     * Visits a simple module.
+     */
+    @Nullable
+    T visitSimpleModule(BareSimpleModule simpleModule, @Nullable P parameter);
 }

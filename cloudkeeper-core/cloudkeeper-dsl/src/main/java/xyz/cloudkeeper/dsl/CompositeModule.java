@@ -13,13 +13,13 @@ public abstract class CompositeModule<D extends CompositeModule<D>>
     extends DSLParentModule<D>
     implements BareCompositeModule {
 
-    @Nullable private final DSLProxyModule linkedModule;
+    @Nullable private final DSLInvokeModule linkedModule;
 
     protected CompositeModule() {
         // A composite module that does not have CompositeModulePlugin annotation is an anonymous module.
         linkedModule
             = (getDSLParent() != null && getModuleClass().isAnnotationPresent(CompositeModulePlugin.class))
-                ? new DSLProxyModule(this)
+                ? new DSLInvokeModule(this)
                 : null;
 
         createPorts(new PortVisitor() {

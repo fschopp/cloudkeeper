@@ -3,6 +3,7 @@ package xyz.cloudkeeper.model.runtime.element.module;
 import xyz.cloudkeeper.model.Immutable;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
+import xyz.cloudkeeper.model.runtime.element.RuntimeElement;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
 import javax.annotation.Nullable;
@@ -17,15 +18,17 @@ import java.util.List;
  * </li><li>
  *     {@link RuntimeInputModule}
  * </li><li>
- *     {@link RuntimeProxyModule}
+ *     {@link RuntimeInvokeModule}
  * </li><li>
  *     {@link RuntimeLoopModule}
+ * </li><li>
+ *     {@link RuntimeSimpleModule}
  * </li></ul>
  *
  * Linked module instances have an identity, so {@code equals()} and {@code hashCode()} are expected to behave like
  * {@link Object#equals(Object)} and {@link Object#hashCode()}, respectively.
  */
-public interface RuntimeModule extends RuntimePortContainer, BareModule, Immutable {
+public interface RuntimeModule extends RuntimeElement, BareModule, Immutable {
     /**
      * {@inheritDoc}
      *
@@ -47,8 +50,22 @@ public interface RuntimeModule extends RuntimePortContainer, BareModule, Immutab
     @Nullable
     <T, P> T accept(RuntimeModuleVisitor<T, P> visitor, @Nullable P parameter);
 
-    @Override
+    /**
+     * Returns the list of all ports.
+     *
+     * The returned list includes both declared ports and implicit ports (like, e.g., the out-port of an input module).
+     */
     ImmutableList<? extends RuntimePort> getPorts();
+
+    /**
+     * Returns the list of all in-ports that are contained in {@link #getPorts()}.
+     */
+    ImmutableList<? extends RuntimeInPort> getInPorts();
+
+    /**
+     * Returns the list of all out-ports that are contained in {@link #getPorts()}.
+     */
+    ImmutableList<? extends RuntimeOutPort> getOutPorts();
 
     // TODO: Remove in favor of getEnclosingElement()?
     /**

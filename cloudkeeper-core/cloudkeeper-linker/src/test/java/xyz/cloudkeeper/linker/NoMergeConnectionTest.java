@@ -14,7 +14,7 @@ import xyz.cloudkeeper.model.beans.element.module.MutableModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableParentInToChildInConnection;
 import xyz.cloudkeeper.model.beans.element.module.MutablePort;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.element.module.MutableSiblingConnection;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.beans.type.MutableTypeMirror;
@@ -55,7 +55,7 @@ public class NoMergeConnectionTest {
                     .setSimpleName("one")
                     .setOutPortType(new MutableDeclaredType().setDeclaration(Integer.class.getName()))
                     .setValue(1),
-                new MutableProxyModule()
+                new MutableInvokeModule()
                     .setDeclaration(BinarySum.class.getName())
                     .setSimpleName("sum")
             ))

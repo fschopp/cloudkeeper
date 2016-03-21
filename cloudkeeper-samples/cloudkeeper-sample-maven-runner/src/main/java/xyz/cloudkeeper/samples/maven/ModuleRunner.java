@@ -25,7 +25,7 @@ import xyz.cloudkeeper.model.api.WorkflowExecution;
 import xyz.cloudkeeper.model.api.staging.InstanceProvider;
 import xyz.cloudkeeper.model.beans.element.MutableQualifiedNamable;
 import xyz.cloudkeeper.model.beans.element.module.MutableModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.immutable.element.Version;
@@ -124,7 +124,7 @@ public final class ModuleRunner {
             .build();
         CloudKeeperEnvironment cloudKeeperEnvironment = cloudKeeper.newCloudKeeperEnvironmentBuilder().build();
 
-        MutableModule<?> module = new MutableProxyModule()
+        MutableModule<?> module = new MutableInvokeModule()
             .setDeclaration(new MutableQualifiedNamable().setQualifiedName(configuration.module));
 
         WorkflowExecution workflowExecution = cloudKeeperEnvironment.newWorkflowExecutionBuilder(module)

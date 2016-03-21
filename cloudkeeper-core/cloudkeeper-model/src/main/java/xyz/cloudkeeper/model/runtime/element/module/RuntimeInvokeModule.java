@@ -1,16 +1,16 @@
 package xyz.cloudkeeper.model.runtime.element.module;
 
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 
 import javax.annotation.Nonnull;
 
 /**
  * Linked module.
  *
- * <p>{@link RuntimeProxyModule} are similar to function calls in a regular programming language. They contain a
+ * <p>{@link RuntimeInvokeModule} are similar to function calls in a regular programming language. They contain a
  * reference to a module declaration.
  */
-public interface RuntimeProxyModule extends BareProxyModule, RuntimeModule {
+public interface RuntimeInvokeModule extends BareInvokeModule, RuntimeModule {
     /**
      * Returns the declaration.
      *

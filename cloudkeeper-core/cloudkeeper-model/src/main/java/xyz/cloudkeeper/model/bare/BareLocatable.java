@@ -12,5 +12,7 @@ public interface BareLocatable {
      * Returns the source-code location where this object was created, or null if not available.
      */
     @Nullable
-    Location getLocation();
+    default Location getLocation() {
+        return null;
+    }
 }

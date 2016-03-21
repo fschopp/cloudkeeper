@@ -1,5 +1,10 @@
 package xyz.cloudkeeper.linker;
 
+import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.CHILD_OUT_TO_COMPOSITE_OUT;
+import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.COMPOSITE_IN_TO_CHILD_IN;
+import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.SHORT_CIRCUIT;
+import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.SIBLING_CONNECTION;
+
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.module.BareIOPort;
 import xyz.cloudkeeper.model.bare.element.module.BareInPort;
@@ -16,18 +21,13 @@ import xyz.cloudkeeper.model.runtime.element.module.RuntimeInPort;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-
-import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.CHILD_OUT_TO_COMPOSITE_OUT;
-import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.COMPOSITE_IN_TO_CHILD_IN;
-import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.SHORT_CIRCUIT;
-import static xyz.cloudkeeper.model.runtime.element.module.ConnectionKind.SIBLING_CONNECTION;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IElementImpl {
     private final SimpleName simpleName;
@@ -37,7 +37,7 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
     private final List<ConnectionImpl> inConnections = new ArrayList<>();
     private final List<ConnectionImpl> outConnections = new ArrayList<>();
 
-    @Nullable private IPortContainerImpl enclosingElement;
+    @Nullable private ModuleImpl enclosingElement;
     private Name qualifiedName;
 
     /**
@@ -127,7 +127,7 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
 
     @Override
     @Nonnull
-    public final IPortContainerImpl getEnclosingElement() {
+    public final ModuleImpl getEnclosingElement() {
         require(State.LINKED);
         assert enclosingElement != null : "must be non-null when in state " + State.LINKED;
         return enclosingElement;
@@ -211,7 +211,7 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
 
     @Override
     void preProcessFreezable(FinishContext context) {
-        enclosingElement = context.getRequiredEnclosingFreezable(IPortContainerImpl.class);
+        enclosingElement = context.getRequiredEnclosingFreezable(ModuleImpl.class);
     }
 
     @Override

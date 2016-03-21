@@ -30,5 +30,11 @@ public interface RuntimeModuleVisitor<T, P> {
      * Visits a proxy module.
      */
     @Nullable
-    T visit(RuntimeProxyModule module, @Nullable P parameter);
+    T visit(RuntimeInvokeModule module, @Nullable P parameter);
+
+    /**
+     * Visits a simple module.
+     */
+    @Nullable
+    T visit(RuntimeSimpleModule module, @Nullable P parameter);
 }

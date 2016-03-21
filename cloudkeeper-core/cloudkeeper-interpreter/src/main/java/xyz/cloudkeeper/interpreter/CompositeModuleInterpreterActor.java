@@ -27,7 +27,7 @@ import xyz.cloudkeeper.model.runtime.element.module.RuntimeOutPort;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeParentInToChildInConnection;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeParentModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimePort;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeShortCircuitConnection;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeSiblingConnection;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeExecutionTrace;
@@ -188,8 +188,8 @@ final class CompositeModuleInterpreterActor extends AbstractModuleInterpreterAct
             this.stagingArea = stagingArea;
             this.interpreterPropsProvider = interpreterPropsProvider;
             RuntimeModule untypedModule = stagingArea.getAnnotatedExecutionTrace().getModule();
-            if (untypedModule instanceof RuntimeProxyModule) {
-                RuntimeProxyModule proxyModule = (RuntimeProxyModule) untypedModule;
+            if (untypedModule instanceof RuntimeInvokeModule) {
+                RuntimeInvokeModule proxyModule = (RuntimeInvokeModule) untypedModule;
                 RuntimeCompositeModuleDeclaration declaration
                     = (RuntimeCompositeModuleDeclaration) proxyModule.getDeclaration();
                 module = declaration.getTemplate();

@@ -1,5 +1,9 @@
 package xyz.cloudkeeper.interpreter;
 
+import static org.mockito.Mockito.mock;
+import static xyz.cloudkeeper.interpreter.ModuleInterpretation.await;
+import static xyz.cloudkeeper.interpreter.ModuleInterpretation.bitSetOf;
+
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.TestActorRef;
@@ -21,13 +25,9 @@ import xyz.cloudkeeper.model.api.RuntimeContext;
 import xyz.cloudkeeper.model.api.RuntimeStateProvider;
 import xyz.cloudkeeper.model.api.executor.SimpleModuleExecutorResult;
 import xyz.cloudkeeper.model.api.staging.InstanceProvider;
-import xyz.cloudkeeper.model.beans.element.MutableBundle;
-import xyz.cloudkeeper.model.beans.element.MutablePackage;
-import xyz.cloudkeeper.model.beans.element.MutableQualifiedNamable;
 import xyz.cloudkeeper.model.beans.element.module.MutableInPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
-import xyz.cloudkeeper.model.beans.element.module.MutableSimpleModuleDeclaration;
+import xyz.cloudkeeper.model.beans.element.module.MutableSimpleModule;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.beans.type.MutableTypeMirror;
 import xyz.cloudkeeper.model.immutable.element.Name;
@@ -36,18 +36,11 @@ import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 
-import javax.annotation.Nullable;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.mockito.Mockito.mock;
-import static xyz.cloudkeeper.interpreter.ModuleInterpretation.await;
-import static xyz.cloudkeeper.interpreter.ModuleInterpretation.bitSetOf;
+import javax.annotation.Nullable;
 
 public class SimpleModuleInterpreterActorTest {
-    private static final Name PACKAGE
-        = Name.qualifiedName(SimpleModuleInterpreterActorTest.class.getPackage().getName());
     private static final int MODULE_ID = 3;
     private static final SimpleName TEST_MODULE_NAME = SimpleName.identifier("TestModule");
     private static final String EXPECTED_MSG = "Just kidding. This is a test.";
@@ -59,30 +52,20 @@ public class SimpleModuleInterpreterActorTest {
     public void setup() throws LinkerException {
         MutableTypeMirror<?> booleanType = new MutableDeclaredType()
             .setDeclaration(Boolean.class.getName());
-        MutableBundle bundle = new MutableBundle()
-            .setBundleIdentifier(URI.create("x-test:" + SimpleModuleInterpreterActorTest.class.getName()))
-            .setPackages(Collections.singletonList(
-                new MutablePackage()
-                    .setQualifiedName(PACKAGE)
-                    .setDeclarations(Collections.singletonList(
-                        new MutableSimpleModuleDeclaration()
-                            .setSimpleName(TEST_MODULE_NAME)
-                            .setPorts(Arrays.asList(
-                                new MutableInPort()
-                                    .setSimpleName("x")
-                                    .setType(booleanType),
-                                new MutableInPort()
-                                    .setSimpleName("y")
-                                    .setType(booleanType),
-                                new MutableOutPort()
-                                    .setSimpleName("p")
-                                    .setType(booleanType)
-                            ))
-                    ))
+        MutableSimpleModule module = new MutableSimpleModule()
+            .setSimpleName(TEST_MODULE_NAME)
+            .setDeclaredPorts(Arrays.asList(
+                new MutableInPort()
+                    .setSimpleName("x")
+                    .setType(booleanType),
+                new MutableInPort()
+                    .setSimpleName("y")
+                    .setType(booleanType),
+                new MutableOutPort()
+                    .setSimpleName("p")
+                    .setType(booleanType)
             ));
-        MutableProxyModule module = new MutableProxyModule()
-            .setDeclaration(new MutableQualifiedNamable().setQualifiedName(PACKAGE.join(TEST_MODULE_NAME)));
-        repository = Linker.createRepository(Collections.singletonList(bundle), LinkerOptions.nonExecutable());
+        repository = Linker.createRepository(Collections.emptyList(), LinkerOptions.nonExecutable());
         executionTrace = Linker.createAnnotatedExecutionTrace(ExecutionTrace.valueOf("/loop/2/sum"), module,
             Collections.emptyList(), repository, LinkerOptions.nonExecutable());
     }

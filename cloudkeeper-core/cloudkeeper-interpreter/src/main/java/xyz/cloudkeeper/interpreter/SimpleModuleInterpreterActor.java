@@ -11,7 +11,7 @@ import xyz.cloudkeeper.model.api.RuntimeStateProvider;
 import xyz.cloudkeeper.model.api.executor.SimpleModuleExecutorResult;
 import xyz.cloudkeeper.model.api.staging.StagingArea;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInPort;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeProxyModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.Objects;
  * Executor for simple modules.
  */
 final class SimpleModuleInterpreterActor extends AbstractModuleInterpreterActor {
-    private final RuntimeProxyModule module;
+    private final RuntimeInvokeModule module;
     private final int moduleId;
     private final StagingArea stagingArea;
     private final ActorRef executor;
@@ -60,7 +60,7 @@ final class SimpleModuleInterpreterActor extends AbstractModuleInterpreterActor 
 
         private final LocalInterpreterProperties interpreterProperties;
         private final StagingArea stagingArea;
-        private final RuntimeProxyModule proxyModule;
+        private final RuntimeInvokeModule proxyModule;
         private final int moduleId;
         private final BitSet recomputedInPorts;
         private final BitSet requestedOutPorts;
@@ -74,7 +74,7 @@ final class SimpleModuleInterpreterActor extends AbstractModuleInterpreterActor 
 
             this.interpreterProperties = interpreterProperties;
             this.stagingArea = stagingArea;
-            proxyModule = (RuntimeProxyModule) stagingArea.getAnnotatedExecutionTrace().getModule();
+            proxyModule = (RuntimeInvokeModule) stagingArea.getAnnotatedExecutionTrace().getModule();
             this.moduleId = moduleId;
             this.recomputedInPorts = (BitSet) recomputedInPorts.clone();
             this.requestedOutPorts = (BitSet) requestedOutPorts.clone();

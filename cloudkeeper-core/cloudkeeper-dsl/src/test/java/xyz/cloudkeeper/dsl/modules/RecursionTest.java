@@ -6,7 +6,7 @@ import xyz.cloudkeeper.dsl.CompositeModule;
 import xyz.cloudkeeper.dsl.CompositeModulePlugin;
 import xyz.cloudkeeper.dsl.ModuleFactory;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 
 public class RecursionTest {
     @CompositeModulePlugin("Recursive module")
@@ -26,9 +26,9 @@ public class RecursionTest {
 
         Assert.assertEquals(recursionModule.getModules().size(), 1);
         BareModule childRecursionTest = recursionModule.getModules().get(0);
-        Assert.assertTrue(childRecursionTest instanceof BareProxyModule);
+        Assert.assertTrue(childRecursionTest instanceof BareInvokeModule);
         Assert.assertEquals(
-            ((BareProxyModule) childRecursionTest).getDeclaration().getQualifiedName().toString(),
+            ((BareInvokeModule) childRecursionTest).getDeclaration().getQualifiedName().toString(),
             RecursionModule.class.getName()
         );
     }

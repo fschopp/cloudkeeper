@@ -11,13 +11,27 @@ public interface BareModuleDeclaration extends BarePluginDeclaration {
     String NAME = "module declaration";
 
     /**
-     * Calls the visitor method that is appropriate for the actual type of this instance.
-     *
-     * @param visitor module visitor
-     * @param parameter parameter that will be passed to the visit method, may be null
-     * @param <T> return type of visitor
-     * @return result returned by visitor
+     * Name of of the template element that every composite-module declaration implicitly contains.
+     */
+    String TEMPLATE_ELEMENT_NAME = "$template";
+
+    /**
+     * Returns the module of this declaration.
      */
     @Nullable
-    <T, P> T accept(BareModuleDeclarationVisitor<T, P> visitor, @Nullable P parameter);
+    BareDeclarableModule getTemplate();
+
+    /**
+     * Default implementations for standard methods.
+     */
+    final class Default {
+        private Default() { }
+
+        /**
+         * Default implementation for {@link BareModuleDeclaration#toString()}.
+         */
+        public static String toString(BareModuleDeclaration instance) {
+            return String.format("%s %s", NAME, instance.getSimpleName());
+        }
+    }
 }

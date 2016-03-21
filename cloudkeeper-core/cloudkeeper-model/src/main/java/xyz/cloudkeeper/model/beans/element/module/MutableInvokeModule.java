@@ -1,7 +1,7 @@
 package xyz.cloudkeeper.model.beans.element.module;
 
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.beans.CopyOption;
 import xyz.cloudkeeper.model.beans.element.MutableQualifiedNamable;
 
@@ -11,23 +11,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Objects;
 
 @XmlRootElement(name = "proxy-module")
-public final class MutableProxyModule extends MutableModule<MutableProxyModule> implements BareProxyModule {
+public final class MutableInvokeModule extends MutableModule<MutableInvokeModule> implements BareInvokeModule {
     private static final long serialVersionUID = 5394012602906125856L;
 
     @Nullable private MutableQualifiedNamable declaration;
 
-    public MutableProxyModule() { }
+    public MutableInvokeModule() { }
 
-    private MutableProxyModule(BareProxyModule original, CopyOption[] copyOptions) {
+    private MutableInvokeModule(BareInvokeModule original, CopyOption[] copyOptions) {
         super(original, copyOptions);
         declaration = MutableQualifiedNamable.copyOf(original.getDeclaration(), copyOptions);
     }
 
     @Nullable
-    public static MutableProxyModule copyOfProxyModule(@Nullable BareProxyModule original, CopyOption... copyOptions) {
+    public static MutableInvokeModule copyOfProxyModule(@Nullable BareInvokeModule original, CopyOption... copyOptions) {
         return original == null
             ? null
-            : new MutableProxyModule(original, copyOptions);
+            : new MutableInvokeModule(original, copyOptions);
     }
 
     @Override
@@ -37,7 +37,7 @@ public final class MutableProxyModule extends MutableModule<MutableProxyModule> 
         } else if (!super.equals(otherObject)) {
             return false;
         }
-        return Objects.equals(declaration, ((MutableProxyModule) otherObject).declaration);
+        return Objects.equals(declaration, ((MutableInvokeModule) otherObject).declaration);
     }
 
     @Override
@@ -47,11 +47,11 @@ public final class MutableProxyModule extends MutableModule<MutableProxyModule> 
 
     @Override
     public String toString() {
-        return BareProxyModule.Default.toString(this);
+        return BareInvokeModule.Default.toString(this);
     }
 
     @Override
-    protected MutableProxyModule self() {
+    protected MutableInvokeModule self() {
         return this;
     }
 
@@ -68,12 +68,12 @@ public final class MutableProxyModule extends MutableModule<MutableProxyModule> 
         return declaration;
     }
 
-    public MutableProxyModule setDeclaration(@Nullable MutableQualifiedNamable declaration) {
+    public MutableInvokeModule setDeclaration(@Nullable MutableQualifiedNamable declaration) {
         this.declaration = declaration;
         return this;
     }
 
-    public MutableProxyModule setDeclaration(String declarationName) {
+    public MutableInvokeModule setDeclaration(String declarationName) {
         return setDeclaration(
             new MutableQualifiedNamable().setQualifiedName(declarationName)
         );

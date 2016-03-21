@@ -6,7 +6,6 @@ import xyz.cloudkeeper.model.beans.MutableLocatableContract;
 public class MutableModuleDeclarationTest {
     @Factory
     public Object[] contracts() {
-        return MutableLocatableContract.contractsFor(MutableSimpleModuleDeclaration.class,
-            MutableCompositeModuleDeclaration.class);
+        return MutableLocatableContract.contractsFor(MutableModuleDeclaration.class);
     }
 }

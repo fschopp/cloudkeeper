@@ -2,17 +2,15 @@ package xyz.cloudkeeper.linker;
 
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.api.Executable;
-import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclarationVisitor;
+import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
 import xyz.cloudkeeper.model.bare.element.module.BarePort;
-import xyz.cloudkeeper.model.bare.element.module.BareSimpleModuleDeclaration;
-import xyz.cloudkeeper.model.beans.element.module.MutablePort;
+import xyz.cloudkeeper.model.bare.element.module.BareSimpleModule;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.RuntimeElement;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleDeclarationVisitor;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleVisitor;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModule;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,30 +18,25 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
-final class SimpleModuleDeclarationImpl extends ModuleDeclarationImpl implements RuntimeSimpleModuleDeclaration {
+final class SimpleModuleImpl extends ModuleImpl implements RuntimeSimpleModule {
     private final Map<SimpleName, PortImpl> declaredPortsMap;
     private final ImmutableList<PortImpl> declaredPorts;
     private final ImmutableList<IInPortImpl> inPorts;
     private final ImmutableList<IOutPortImpl> outPorts;
     @Nullable private volatile Executable executable;
 
-    // No need to be volatile because instance variable is only accessed before object is finished, which will always
-    // be from a single thread.
-    @Nullable private List<BarePort> mutablePorts;
+    SimpleModuleImpl(BareSimpleModule original, CopyContext parentContext, int index) throws LinkerException {
+        super(original, parentContext, index);
 
-    SimpleModuleDeclarationImpl(BareSimpleModuleDeclaration original, CopyContext parentContext)
-            throws LinkerException {
-        super(original, parentContext);
-
-        List<? extends BarePort> originalPorts = original.getPorts();
+        List<? extends BarePort> originalPorts = original.getDeclaredPorts();
 
         PortAccumulationState state = new PortAccumulationState();
         Map<SimpleName, PortImpl> newPortMap = new LinkedHashMap<>();
         collect(
             originalPorts,
-            "ports",
+            "declaredPorts",
             portConstructor(state),
             Arrays.asList(
                 portAccumulator(state),
@@ -54,26 +47,32 @@ final class SimpleModuleDeclarationImpl extends ModuleDeclarationImpl implements
         declaredPorts = ImmutableList.copyOf(newPortMap.values());
         inPorts = ImmutableList.copyOf(state.getInPorts());
         outPorts = ImmutableList.copyOf(state.getOutPorts());
-
-        // At this point, it should be perfectly safe to create a mutable copy of the port list as well. All possible
-        // errors should have been detected when creating the list of runtime (immutable) ports.
-        mutablePorts = originalPorts.stream().map(MutablePort::copyOfPort).collect(Collectors.toList());
     }
 
     @Override
     public String toString() {
-        return BareSimpleModuleDeclaration.Default.toString(this);
+        return BareSimpleModule.Default.toString(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * A simple module does not inherit any annotations.
+     */
+    @Override
+    public IElementImpl getSuperAnnotatedConstruct() {
+        return null;
     }
 
     @Override
     @Nullable
-    public <T, P> T accept(BareModuleDeclarationVisitor<T, P> visitor, @Nullable P parameter) {
-        return visitor.visit(this, parameter);
+    public <T, P> T accept(BareModuleVisitor<T, P> visitor, @Nullable P parameter) {
+        return visitor.visitSimpleModule(this, parameter);
     }
 
     @Override
     @Nullable
-    public <T, P> T accept(RuntimeModuleDeclarationVisitor<T, P> visitor, @Nullable P parameter) {
+    public <T, P> T accept(RuntimeModuleVisitor<T, P> visitor, @Nullable P parameter) {
         return visitor.visit(this, parameter);
     }
 
@@ -99,18 +98,13 @@ final class SimpleModuleDeclarationImpl extends ModuleDeclarationImpl implements
     }
 
     @Override
-    public ImmutableList<PortImpl> getPorts() {
+    public ImmutableList<PortImpl> getDeclaredPorts() {
         return declaredPorts;
     }
 
     @Override
-    List<? extends BarePort> getBarePorts() {
-        if (getState().compareTo(State.FINISHED) >= 0) {
-            return declaredPorts;
-        } else {
-            assert mutablePorts != null : "must be non-null while not yet finished";
-            return mutablePorts;
-        }
+    public ImmutableList<PortImpl> getPorts() {
+        return declaredPorts;
     }
 
     @Override
@@ -124,7 +118,7 @@ final class SimpleModuleDeclarationImpl extends ModuleDeclarationImpl implements
     }
 
     @Override
-    public Executable toExecutable() {
+    public Executable getDefinition() {
         require(State.FINISHED);
         @Nullable Executable localExecutable = executable;
         if (localExecutable == null) {
@@ -142,8 +136,13 @@ final class SimpleModuleDeclarationImpl extends ModuleDeclarationImpl implements
     }
 
     @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
-        mutablePorts = null;
+    void preProcessFreezable(FinishContext context) { }
+
+    @Override
+    void finishModule(FinishContext context) throws LinkerException {
         executable = context.getExecutable(this);
     }
+
+    @Override
+    void verifyFreezable(VerifyContext context) { }
 }

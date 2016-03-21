@@ -1,57 +1,60 @@
 package xyz.cloudkeeper.model.beans.element.module;
 
 import xyz.cloudkeeper.model.bare.element.BarePluginDeclarationVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
-import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclarationVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareSimpleModuleDeclaration;
 import xyz.cloudkeeper.model.beans.CopyOption;
 import xyz.cloudkeeper.model.beans.element.MutablePluginDeclaration;
 
 import javax.annotation.Nullable;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlElement;
 
-@XmlSeeAlso({ MutableCompositeModuleDeclaration.class, MutableSimpleModuleDeclaration.class })
-public abstract class MutableModuleDeclaration<D extends MutableModuleDeclaration<D>>
-        extends MutablePluginDeclaration<D>
+public final class MutableModuleDeclaration
+        extends MutablePluginDeclaration<MutableModuleDeclaration>
         implements BareModuleDeclaration {
     private static final long serialVersionUID = -3405633500476304133L;
 
-    MutableModuleDeclaration() { }
+    @Nullable private MutableDeclarableModule<?> template;
 
-    MutableModuleDeclaration(BareModuleDeclaration original, CopyOption[] copyOptions) {
+    public MutableModuleDeclaration() { }
+
+    private MutableModuleDeclaration(BareModuleDeclaration original, CopyOption[] copyOptions) {
         super(original, copyOptions);
-    }
-
-    private enum CopyVisitor implements BareModuleDeclarationVisitor<MutableModuleDeclaration<?>, CopyOption[]> {
-        INSTANCE;
-
-        @Override
-        public MutableModuleDeclaration<?> visit(BareCompositeModuleDeclaration declaration,
-                @Nullable CopyOption[] copyOptions) {
-            assert copyOptions != null;
-            return MutableCompositeModuleDeclaration.copyOfCompositeModuleDeclaration(declaration, copyOptions);
-        }
-
-        @Override
-        public MutableModuleDeclaration<?> visit(BareSimpleModuleDeclaration declaration,
-                @Nullable CopyOption[] copyOptions) {
-            assert copyOptions != null;
-            return MutableSimpleModuleDeclaration.copyOfSimpleModuleDeclaration(declaration, copyOptions);
-        }
+        template = (MutableDeclarableModule<?>) MutableModule.copyOfModule(original.getTemplate(), copyOptions);
     }
 
     @Nullable
-    public static MutableModuleDeclaration<?> copyOfModuleDeclaration(@Nullable BareModuleDeclaration original,
+    public static MutableModuleDeclaration copyOfModuleDeclaration(@Nullable BareModuleDeclaration original,
             CopyOption... copyOptions) {
-        return original != null
-            ? original.accept(CopyVisitor.INSTANCE, copyOptions)
-            : null;
+        return original == null
+            ? null
+            : new MutableModuleDeclaration(original, copyOptions);
+    }
+
+    @Override
+    public String toString() {
+        return BareModuleDeclaration.Default.toString(this);
     }
 
     @Override
     @Nullable
     public final <T, P> T accept(BarePluginDeclarationVisitor<T, P> visitor, @Nullable P parameter) {
         return visitor.visit(this, parameter);
+    }
+
+    @Override
+    protected MutableModuleDeclaration self() {
+        return this;
+    }
+
+    @XmlElement
+    @Override
+    @Nullable
+    public MutableDeclarableModule<?> getTemplate() {
+        return template;
+    }
+
+    public MutableModuleDeclaration setTemplate(@Nullable MutableDeclarableModule<?> template) {
+        this.template = template;
+        return this;
     }
 }

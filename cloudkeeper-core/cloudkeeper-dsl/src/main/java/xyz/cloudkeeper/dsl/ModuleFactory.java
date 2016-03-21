@@ -12,17 +12,15 @@ import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotation;
 import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotationEntry;
 import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotationTypeDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareCompositeModule;
-import xyz.cloudkeeper.model.bare.element.module.BareCompositeModuleDeclaration;
+import xyz.cloudkeeper.model.bare.element.module.BareDeclarableModule;
 import xyz.cloudkeeper.model.bare.element.module.BareInputModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.bare.element.module.BareLoopModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
-import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclarationVisitor;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareParentModule;
 import xyz.cloudkeeper.model.bare.element.module.BarePort;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
-import xyz.cloudkeeper.model.bare.element.module.BareSimpleModuleDeclaration;
+import xyz.cloudkeeper.model.bare.element.module.BareSimpleModule;
 import xyz.cloudkeeper.model.bare.element.serialization.BareSerializationDeclaration;
 import xyz.cloudkeeper.model.bare.element.type.BareTypeDeclaration;
 import xyz.cloudkeeper.model.bare.element.type.BareTypeParameterElement;
@@ -39,15 +37,13 @@ import xyz.cloudkeeper.model.beans.element.MutableBundle;
 import xyz.cloudkeeper.model.beans.element.MutablePackage;
 import xyz.cloudkeeper.model.beans.element.MutablePluginDeclaration;
 import xyz.cloudkeeper.model.beans.element.annotation.MutableAnnotationTypeDeclaration;
-import xyz.cloudkeeper.model.beans.element.module.MutableCompositeModuleDeclaration;
-import xyz.cloudkeeper.model.beans.element.module.MutableSimpleModuleDeclaration;
+import xyz.cloudkeeper.model.beans.element.module.MutableModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.serialization.MutableSerializationDeclaration;
 import xyz.cloudkeeper.model.beans.element.type.MutableTypeDeclaration;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.util.BuildInformation;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
@@ -62,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 public final class ModuleFactory {
     private final ProxyClassLoader proxyClassLoader;
@@ -201,21 +198,21 @@ public final class ModuleFactory {
         return typedClass;
     }
 
-    private <T extends CompositeModule<T>> DSLCompositeModuleDeclaration newCompositeModuleDeclaration(
+    private <T extends CompositeModule<T>> DSLModuleDeclaration newCompositeModuleDeclaration(
             Class<?> pluginClass) {
         requirePluginClass(pluginClass, CompositeModule.class);
 
         @SuppressWarnings("unchecked")
         Class<T> typedClass = (Class<T>) pluginClass;
-        return new DSLCompositeModuleDeclaration(typedClass, this);
+        return new DSLModuleDeclaration(typedClass, CompositeModule.class, this);
     }
 
-    private <T extends SimpleModule<T>> DSLSimpleModuleDeclaration newSimpleModuleDeclaration(Class<?> pluginClass) {
+    private <T extends SimpleModule<T>> DSLModuleDeclaration newSimpleModuleDeclaration(Class<?> pluginClass) {
         requirePluginClass(pluginClass, SimpleModule.class);
 
         @SuppressWarnings("unchecked")
         Class<T> typedClass = (Class<T>) pluginClass;
-        return new DSLSimpleModuleDeclaration(typedClass, this);
+        return new DSLModuleDeclaration(typedClass, SimpleModule.class, this);
     }
 
     /**
@@ -238,11 +235,11 @@ public final class ModuleFactory {
                 new DSLAnnotationTypeDeclaration(requirePluginClass(pluginClass, Annotation.class))
             );
         } else if (CompositeModulePlugin.class.equals(annotationType)) {
-            return MutableCompositeModuleDeclaration.copyOfCompositeModuleDeclaration(
+            return MutableModuleDeclaration.copyOfModuleDeclaration(
                 newCompositeModuleDeclaration(pluginClass)
             );
         } else if (SimpleModulePlugin.class.equals(annotationType)) {
-            return MutableSimpleModuleDeclaration.copyOfSimpleModuleDeclaration(
+            return MutableModuleDeclaration.copyOfModuleDeclaration(
                 newSimpleModuleDeclaration(pluginClass)
             );
         } else if (TypePlugin.class.equals(annotationType)) {
@@ -338,8 +335,6 @@ public final class ModuleFactory {
         private final Deque<BareTypeMirror> portTypeQueue;
         private final BareModuleVisitor<Void, Void> moduleVisitor = new ModuleVisitor();
         private final BareTypeMirrorVisitor<Void, Void> portTypeVisitor = new TypeVisitor();
-        private final BareModuleDeclarationVisitor<Void, Void> moduleDeclarationVisitor
-            = new ModuleDeclarationVisitor();
         private final BarePluginDeclarationVisitor<Void, Name> declarationVisitor = new DeclarationVisitor();
 
         TransitiveDeclarationsContext(Collection<? extends BareModule> modules, Collection<Name> declarations,
@@ -415,8 +410,8 @@ public final class ModuleFactory {
         }
 
         final class ModuleVisitor implements BareModuleVisitor<Void, Void> {
-            private void addPorts(BareParentModule parentModule) {
-                for (BarePort port: parentModule.getDeclaredPorts()) {
+            private void addPorts(BareDeclarableModule declarableModule) {
+                for (BarePort port: declarableModule.getDeclaredPorts()) {
                     scanAnnotations(port.getDeclaredAnnotations());
                     portTypeQueue.add(port.getType());
                 }
@@ -443,25 +438,16 @@ public final class ModuleFactory {
             }
 
             @Override
-            public Void visitLinkedModule(BareProxyModule module, Void ignored) {
+            public Void visitLinkedModule(BareInvokeModule module, Void ignored) {
                 // Port types will be added when declaration is added
                 addToQueue(declarationQueue, module.getDeclaration().getQualifiedName());
                 return null;
             }
-        }
 
-        final class ModuleDeclarationVisitor implements BareModuleDeclarationVisitor<Void, Void> {
+            @Nullable
             @Override
-            public Void visit(BareCompositeModuleDeclaration declaration, Void ignored) {
-                addToQueue(moduleQueue, declaration.getTemplate());
-                return null;
-            }
-
-            @Override
-            public Void visit(BareSimpleModuleDeclaration declaration, Void ignored) {
-                for (BarePort port: declaration.getPorts()) {
-                    addToQueue(portTypeQueue, port.getType());
-                }
+            public Void visitSimpleModule(BareSimpleModule module, @Nullable Void ignored) {
+                addPorts(module);
                 return null;
             }
         }
@@ -515,7 +501,7 @@ public final class ModuleFactory {
         final class DeclarationVisitor implements BarePluginDeclarationVisitor<Void, Name> {
             @Override
             public Void visit(BareModuleDeclaration declaration, Name ignored) {
-                declaration.accept(moduleDeclarationVisitor, null);
+                addToQueue(moduleQueue, declaration.getTemplate());
                 return null;
             }
 

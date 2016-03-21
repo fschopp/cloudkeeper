@@ -2,58 +2,42 @@ package xyz.cloudkeeper.linker;
 
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.BarePluginDeclarationVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareCompositeModuleDeclaration;
+import xyz.cloudkeeper.model.bare.element.module.BareDeclarableModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
-import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclarationVisitor;
 import xyz.cloudkeeper.model.bare.element.module.BarePort;
-import xyz.cloudkeeper.model.bare.element.module.BareSimpleModuleDeclaration;
+import xyz.cloudkeeper.model.beans.element.module.MutablePort;
+import xyz.cloudkeeper.model.immutable.element.SimpleName;
+import xyz.cloudkeeper.model.runtime.element.RuntimeElement;
 import xyz.cloudkeeper.model.runtime.element.RuntimePluginDeclarationVisitor;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeDeclarableModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleDeclaration;
+import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
-/**
- * Abstract module declaration, containing static information about a module, such as the name (identifier), in- and
- * out-port types and other aspects.
- *
- * Only simple and composite modules can be declared. Therefore, the only two subclasses are
- * {@link SimpleModuleDeclarationImpl} and {@link CompositeModuleDeclarationImpl}.
- */
-abstract class ModuleDeclarationImpl
-        extends PluginDeclarationImpl
-        implements RuntimeModuleDeclaration, IPortContainerImpl {
-    ModuleDeclarationImpl(BareModuleDeclaration original, CopyContext parentContext) throws LinkerException {
+final class ModuleDeclarationImpl extends PluginDeclarationImpl implements RuntimeModuleDeclaration {
+    private final ModuleImpl template;
+
+    ModuleDeclarationImpl(@Nullable  BareModuleDeclaration original, CopyContext parentContext) throws LinkerException {
         super(original, parentContext);
-    }
+        assert original != null;
 
-    private enum CopyVisitor
-            implements BareModuleDeclarationVisitor<Try<? extends ModuleDeclarationImpl>, CopyContext> {
-        INSTANCE;
+        CopyContext context = getCopyContext();
+        @Nullable BareDeclarableModule originalTemplate = original.getTemplate();
+        CopyContext templateContext = context.newContextForProperty("template");
+        template = ModuleImpl.copyOf(originalTemplate, templateContext, -1);
+        assert originalTemplate != null : "non-null due to successful ModuleImpl#copyOf";
+        Preconditions.requireCondition(template.getDeclaredAnnotations().isEmpty(), templateContext,
+            "Template module of composite-module declaration cannot have annotations.");
 
-        @Override
-        @Nullable
-        public Try<CompositeModuleDeclarationImpl> visit(BareCompositeModuleDeclaration declaration,
-                @Nullable CopyContext parentContext) {
-            assert parentContext != null;
-            return Try.run(() -> new CompositeModuleDeclarationImpl(declaration, parentContext));
-        }
-
-        @Override
-        @Nullable
-        public Try<SimpleModuleDeclarationImpl> visit(BareSimpleModuleDeclaration declaration,
-                @Nullable CopyContext parentContext) {
-            assert parentContext != null;
-            return Try.run(() -> new SimpleModuleDeclarationImpl(declaration, parentContext));
-        }
-    }
-
-    static ModuleDeclarationImpl copyOf(BareModuleDeclaration original, CopyContext parentContext)
-            throws LinkerException {
-        Preconditions.requireNonNull(original, parentContext);
-        @Nullable Try<? extends ModuleDeclarationImpl> copyTry = original.accept(CopyVisitor.INSTANCE, parentContext);
-        assert copyTry != null;
-        return copyTry.get();
+        // At this point, it should be perfectly safe to create a mutable copy of the port list as well. All possible
+        // errors should have been detected when creating the list of runtime (immutable) ports.
+        List<? extends BarePort> originalPorts = originalTemplate.getDeclaredPorts();
+        mutablePorts = originalPorts.stream().map(MutablePort::copyOfPort).collect(Collectors.toList());
     }
 
     @Override
@@ -85,8 +69,36 @@ abstract class ModuleDeclarationImpl
         return null;
     }
 
+    // No need to be volatile because instance variable is only accessed before object is finished, which will always
+    // be from a single thread.
+    @Nullable private List<MutablePort<?>> mutablePorts;
+
+    @Override
+    public String toString() {
+        return BareModuleDeclaration.Default.toString(this);
+    }
+
+    @Override
+    public ImmutableList<? extends IElementImpl> getEnclosedElements() {
+        return ImmutableList.of(template);
+    }
+
+    @Override
+    public <T extends RuntimeElement> T getEnclosedElement(Class<T> clazz, SimpleName simpleName) {
+        Objects.requireNonNull(clazz);
+        Objects.requireNonNull(simpleName);
+
+        if (simpleName.contentEquals(TEMPLATE_ELEMENT_NAME) && clazz.isInstance(template)) {
+            @SuppressWarnings("unchecked")
+            T typedTemplate = (T) template;
+            return typedTemplate;
+        } else {
+            return null;
+        }
+    }
+
     /**
-     * Returns the list of ports, similar to {@link #getPorts()} but with weaker return type.
+     * Returns the list of ports, similar to {@link ModuleImpl#getPorts()} but with weaker return type.
      *
      * <p>This method may be called (and its return value be used) safely even before the module declaration is fully
      * constructed; that is, before the state is {@link State#PRECOMPUTED}. Once this instance is frozen, this method
@@ -98,10 +110,32 @@ abstract class ModuleDeclarationImpl
      * <p>Since this method is a package-private method, no precaution is taken to prevent exposing internal mutable
      * data structures. Callers are expected not to modify the returned list.
      *
-     * @see ProxyModuleImpl#preProcessFreezable(FinishContext)
+     * @see InvokeModuleImpl#preProcessFreezable(FinishContext)
      */
-    abstract List<? extends BarePort> getBarePorts();
+    List<? extends BarePort> getBarePorts() {
+        if (getState().compareTo(State.FINISHED) >= 0) {
+            return template.getPorts();
+        } else {
+            assert mutablePorts != null : "must be non-null while not yet finished";
+            return mutablePorts;
+        }
+    }
 
     @Override
-    final void verifyFreezable(VerifyContext context) { }
+    public RuntimeDeclarableModule getTemplate() {
+        return (RuntimeDeclarableModule) template;
+    }
+
+    @Override
+    void collectEnclosedByAnnotatedConstruct(Collection<AbstractFreezable> freezables) {
+        freezables.add(template);
+    }
+
+    @Override
+    void finishFreezable(FinishContext context) {
+        mutablePorts = null;
+    }
+
+    @Override
+    void verifyFreezable(VerifyContext context) { }
 }

@@ -2,13 +2,7 @@ package xyz.cloudkeeper.model.bare.element.module;
 
 import java.util.List;
 
-public interface BareParentModule extends BareModule {
-    /**
-     * Returns all declared ports, but not implicit ports (such as the continue-port in a
-     * {@link BareLoopModule}).
-     */
-    List<? extends BarePort> getDeclaredPorts();
-
+public interface BareParentModule extends BareDeclarableModule {
     /**
      * Returns the child modules in this parent module.
      */

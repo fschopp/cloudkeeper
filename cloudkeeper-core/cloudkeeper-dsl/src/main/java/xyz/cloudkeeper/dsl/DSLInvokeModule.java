@@ -4,7 +4,7 @@ import xyz.cloudkeeper.model.Immutable;
 import xyz.cloudkeeper.model.bare.element.BareQualifiedNameable;
 import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotation;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareProxyModule;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.beans.element.MutableQualifiedNamable;
 import xyz.cloudkeeper.model.immutable.Location;
 import xyz.cloudkeeper.model.immutable.element.Name;
@@ -14,11 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-final class DSLProxyModule implements BareProxyModule, Immutable {
+final class DSLInvokeModule implements BareInvokeModule, Immutable {
     private final Module<?> module;
     private final MutableQualifiedNamable declaration;
 
-    DSLProxyModule(Module<?> module) {
+    DSLInvokeModule(Module<?> module) {
         Objects.requireNonNull(module);
         if (!(module instanceof SimpleModule<?>) && !(module instanceof CompositeModule<?>)) {
             throw new IllegalArgumentException(String.format(

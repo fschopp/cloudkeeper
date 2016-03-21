@@ -6,7 +6,7 @@ import xyz.cloudkeeper.model.util.ImmutableList;
 
 import javax.annotation.Nullable;
 
-public interface RuntimeParentModule extends BareParentModule, RuntimeModule {
+public interface RuntimeParentModule extends BareParentModule, RuntimeDeclarableModule {
     /**
      * {@inheritDoc}
      *
@@ -16,9 +16,6 @@ public interface RuntimeParentModule extends BareParentModule, RuntimeModule {
      */
     @Override
     ImmutableList<? extends RuntimeModule> getModules();
-
-    @Override
-    ImmutableList<? extends RuntimePort> getDeclaredPorts();
 
     /**
      * Returns the child with the given name.

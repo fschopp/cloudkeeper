@@ -8,6 +8,7 @@ import xyz.cloudkeeper.model.bare.BareLocatable;
 import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotation;
 import xyz.cloudkeeper.model.bare.element.module.BareIOPort;
 import xyz.cloudkeeper.model.bare.element.module.BareInPort;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
 import xyz.cloudkeeper.model.bare.element.module.BareOutPort;
 import xyz.cloudkeeper.model.bare.element.module.BarePort;
@@ -397,7 +398,7 @@ public abstract class Module<D extends Module<D>> extends AbstractFreezable impl
      * Returns the bare-module instance corresponding to this module instance.
      *
      * This is not necessarily always this object. For example, a module might have to be a
-     * {@link xyz.cloudkeeper.model.bare.element.module.BareProxyModule} according to the model, but the DSL
+     * {@link BareInvokeModule} according to the model, but the DSL
      * module is actually a {@link CompositeModule}.
      *
      * @return model instance

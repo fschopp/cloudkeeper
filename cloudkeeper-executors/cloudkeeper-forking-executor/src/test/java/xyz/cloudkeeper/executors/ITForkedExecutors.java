@@ -16,7 +16,7 @@ import xyz.cloudkeeper.model.api.staging.InstanceProvider;
 import xyz.cloudkeeper.model.api.staging.StagingArea;
 import xyz.cloudkeeper.model.api.util.RecursiveDeleteVisitor;
 import xyz.cloudkeeper.model.bare.execution.BareOverride;
-import xyz.cloudkeeper.model.beans.element.module.MutableProxyModule;
+import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
@@ -106,7 +106,7 @@ public class ITForkedExecutors {
                  = await(runtimeContextFactory.newRuntimeContext(Collections.singletonList(bundleURI)))) {
             RuntimeAnnotatedExecutionTrace rootTrace = runtimeContext.newAnnotatedExecutionTrace(
                 ExecutionTrace.empty(),
-                new MutableProxyModule().setDeclaration(Decrease.class.getName()),
+                new MutableInvokeModule().setDeclaration(Decrease.class.getName()),
                 Collections.<BareOverride>emptyList()
             );
 

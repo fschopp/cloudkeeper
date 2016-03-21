@@ -389,7 +389,7 @@ abstract class ConnectionImpl extends LocatableImpl implements RuntimeConnection
      * <p>This methods must run before the {@link ParentModuleImpl#finish(FinishContext)} method of the enclosing
      * parent module is called.
      *
-     * @see ProxyModuleImpl#preProcessFreezable(FinishContext)
+     * @see InvokeModuleImpl#preProcessFreezable(FinishContext)
      * @see ParentModuleImpl#collectEnclosedByAnnotatedConstruct(Collection)
      *
      * @throws xyz.cloudkeeper.model.NotFoundException if modules or ports cannot be resolved

@@ -169,5 +169,8 @@ abstract class ParentModuleImpl extends ModuleImpl implements RuntimeParentModul
     final void preProcessFreezable(FinishContext context) { }
 
     @Override
+    final void finishModule(FinishContext context) { }
+
+    @Override
     final void verifyFreezable(VerifyContext context) { }
 }
