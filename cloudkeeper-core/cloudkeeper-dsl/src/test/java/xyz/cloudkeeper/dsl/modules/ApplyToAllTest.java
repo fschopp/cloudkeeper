@@ -9,7 +9,6 @@ import xyz.cloudkeeper.dsl.ModuleFactory;
 import xyz.cloudkeeper.dsl.SimpleModule;
 import xyz.cloudkeeper.dsl.SimpleModulePlugin;
 import xyz.cloudkeeper.dsl.types.BAMFile;
-import xyz.cloudkeeper.model.bare.element.module.BareCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.bare.type.BareDeclaredType;
 
 import java.util.Collection;

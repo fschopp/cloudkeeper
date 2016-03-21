@@ -17,7 +17,6 @@ import xyz.cloudkeeper.model.api.staging.StagingAreaProvider;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 
 import javax.annotation.Nullable;

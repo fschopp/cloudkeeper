@@ -3,7 +3,7 @@ package xyz.cloudkeeper.dsl;
 import xyz.cloudkeeper.dsl.exception.InvalidClassException;
 import xyz.cloudkeeper.model.Immutable;
 import xyz.cloudkeeper.model.bare.element.BarePluginDeclarationVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareDeclarableModule;
+import xyz.cloudkeeper.model.bare.element.module.BareDeclaredPortsModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
 import xyz.cloudkeeper.model.immutable.Location;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
@@ -61,7 +61,7 @@ final class DSLModuleDeclaration implements BareModuleDeclaration, Immutable {
     }
 
     @Override
-    public BareDeclarableModule getTemplate() {
-        return (BareDeclarableModule) template;
+    public BareDeclaredPortsModule getTemplate() {
+        return (BareDeclaredPortsModule) template;
     }
 }

@@ -29,14 +29,14 @@ public interface RuntimeAnnotatedExecutionTrace extends RuntimeExecutionTrace {
      * Returns the module represented by the last element of this execution trace, or the module of the parent trace if
      * the last element of this execution trace does not represent a module (recursive definition).
      *
-     * <p>If the current module is a proxy module referencing a composite module declaration, then a
-     * {@link RuntimeInvokeModule} instance is returned by this
+     * <p>Note that a well-defined return value is guaranteed to exist because the first element of an absolute
+     * execution trace always represents a module.
+     *
+     * <p>If the current module is an invoke module, then a {@link RuntimeInvokeModule} instance is returned by this
      * method.
      *
      * @return Module represented by the last element of this execution trace, or the module of the parent trace if the
-     *     last element of this execution trace does not represent a module (recursive definition). The return value is
-     *     guaranteed to be non-null because the first element of an absolute execution trace always represents a
-     *     module.
+     *     last element of this execution trace does not represent a module (recursive definition).
      */
     RuntimeModule getModule();
 

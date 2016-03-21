@@ -17,7 +17,6 @@ import xyz.cloudkeeper.model.immutable.element.Key;
 import xyz.cloudkeeper.model.immutable.element.NoKey;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.element.serialization.RuntimeByteSequence;
 import xyz.cloudkeeper.model.runtime.element.serialization.RuntimeSerializationNode;
 import xyz.cloudkeeper.model.runtime.element.serialization.RuntimeSerializationNodeVisitor;

@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  *
  * This interface models a simple module as part of an optimized abstract syntax tree with runtime state information.
  */
-public interface RuntimeSimpleModule extends RuntimeDeclarableModule, BareSimpleModule {
+public interface RuntimeSimpleModule extends RuntimeDeclaredPortsModule, BareSimpleModule {
     /**
      * Returns the executable instance for this simple module.
      *
@@ -18,5 +18,5 @@ public interface RuntimeSimpleModule extends RuntimeDeclarableModule, BareSimple
      */
     @Override
     @Nonnull
-    Executable getDefinition();
+    RuntimeSimpleModuleBody getDefinition();
 }

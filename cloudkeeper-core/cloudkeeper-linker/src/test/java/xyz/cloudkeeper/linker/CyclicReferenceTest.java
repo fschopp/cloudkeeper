@@ -19,7 +19,6 @@ import xyz.cloudkeeper.model.beans.element.module.MutablePort;
 import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModuleDeclaration;
 
 import javax.annotation.Nullable;
 import java.net.URI;

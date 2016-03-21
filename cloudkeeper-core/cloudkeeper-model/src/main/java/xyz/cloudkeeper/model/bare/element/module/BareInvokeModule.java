@@ -7,7 +7,8 @@ import javax.annotation.Nullable;
 /**
  * Invoke module.
  *
- * <p>Modules of this kind <em>invoke</em> a declared module.
+ * <p>Modules of this kind <em>invoke</em> a {@link BareModuleDeclaration}, which contains a
+ * {@link BareDeclarableModule}.
  */
 public interface BareInvokeModule extends BareModule {
     /**

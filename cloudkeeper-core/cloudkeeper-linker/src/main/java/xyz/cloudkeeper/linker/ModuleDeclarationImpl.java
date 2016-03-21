@@ -2,14 +2,14 @@ package xyz.cloudkeeper.linker;
 
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.BarePluginDeclarationVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareDeclarableModule;
+import xyz.cloudkeeper.model.bare.element.module.BareDeclaredPortsModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BarePort;
 import xyz.cloudkeeper.model.beans.element.module.MutablePort;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.RuntimeElement;
 import xyz.cloudkeeper.model.runtime.element.RuntimePluginDeclarationVisitor;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeDeclarableModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeDeclaredPortsModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleDeclaration;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
@@ -27,7 +27,7 @@ final class ModuleDeclarationImpl extends PluginDeclarationImpl implements Runti
         assert original != null;
 
         CopyContext context = getCopyContext();
-        @Nullable BareDeclarableModule originalTemplate = original.getTemplate();
+        @Nullable BareDeclaredPortsModule originalTemplate = original.getTemplate();
         CopyContext templateContext = context.newContextForProperty("template");
         template = ModuleImpl.copyOf(originalTemplate, templateContext, -1);
         assert originalTemplate != null : "non-null due to successful ModuleImpl#copyOf";
@@ -122,8 +122,8 @@ final class ModuleDeclarationImpl extends PluginDeclarationImpl implements Runti
     }
 
     @Override
-    public RuntimeDeclarableModule getTemplate() {
-        return (RuntimeDeclarableModule) template;
+    public RuntimeDeclaredPortsModule getTemplate() {
+        return (RuntimeDeclaredPortsModule) template;
     }
 
     @Override

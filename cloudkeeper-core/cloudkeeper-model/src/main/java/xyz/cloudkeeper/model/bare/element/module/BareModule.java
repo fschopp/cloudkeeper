@@ -34,7 +34,7 @@ public interface BareModule extends BareElement, BareSimpleNameable {
      * Returns the name of this module, or {@code null} of this module does not have a name.
      *
      * <p>A module is only allowed not to have a name if it is a top-level module that does not have an enclosing
-     * (parent) module. As an example, {@link BareCompositeModuleDeclaration#getTemplate()} always returns a top-level
+     * (parent) module. As an example, {@link BareModuleDeclaration#getTemplate()} always returns a top-level
      * module.
      *
      * @return name of this module, or {@code null} of this module does not have a name

@@ -22,7 +22,6 @@ import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -12,7 +12,7 @@ import xyz.cloudkeeper.model.immutable.element.Key;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeDeclarableModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeDeclaredPortsModule;
 import xyz.cloudkeeper.model.runtime.execution.IllegalExecutionTraceException;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeElementPatternTarget;
@@ -390,7 +390,7 @@ final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements Run
         @Nullable ParentModuleImpl parentModule = null;
         if (element instanceof InvokeModuleImpl) {
             ModuleDeclarationImpl declaration = ((InvokeModuleImpl) element).getDeclaration();
-            RuntimeDeclarableModule template = declaration.getTemplate();
+            RuntimeDeclaredPortsModule template = declaration.getTemplate();
             if (template instanceof ParentModuleImpl) {
                 parentModule = (ParentModuleImpl) template;
             }

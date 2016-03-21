@@ -6,7 +6,6 @@ import xyz.cloudkeeper.dsl.ModuleFactory;
 import xyz.cloudkeeper.dsl.SimpleModule;
 import xyz.cloudkeeper.dsl.SimpleModulePlugin;
 import xyz.cloudkeeper.model.bare.BareLocatable;
-import xyz.cloudkeeper.model.bare.element.module.BareSimpleModuleDeclaration;
 import xyz.cloudkeeper.model.bare.type.BareDeclaredType;
 import xyz.cloudkeeper.model.beans.type.MutableTypeMirror;
 

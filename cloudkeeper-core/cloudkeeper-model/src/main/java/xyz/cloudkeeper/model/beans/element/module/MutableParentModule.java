@@ -3,7 +3,6 @@ package xyz.cloudkeeper.model.beans.element.module;
 import xyz.cloudkeeper.model.bare.element.module.BareConnection;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
 import xyz.cloudkeeper.model.bare.element.module.BareParentModule;
-import xyz.cloudkeeper.model.bare.element.module.BarePort;
 import xyz.cloudkeeper.model.beans.CopyOption;
 
 import javax.annotation.Nullable;
@@ -18,7 +17,7 @@ import java.util.Objects;
 
 @XmlType(propOrder = { "declaredPorts", "modules", "connections" })
 public abstract class MutableParentModule<D extends MutableParentModule<D>>
-        extends MutableDeclarableModule<D>
+        extends MutableDeclaredPortsModule<D>
         implements BareParentModule {
     private static final long serialVersionUID = 4744751589966311180L;
 

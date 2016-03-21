@@ -4,7 +4,7 @@ import xyz.cloudkeeper.model.bare.element.BareReferenceable;
 
 import javax.annotation.Nullable;
 
-public interface BareSimpleModule extends BareDeclarableModule {
+public interface BareSimpleModule extends BareDeclaredPortsModule {
     /**
      * Human-readable name of the entity modeled by this interface.
      */

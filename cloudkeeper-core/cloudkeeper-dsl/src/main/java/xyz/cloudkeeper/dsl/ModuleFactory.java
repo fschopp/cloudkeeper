@@ -12,7 +12,7 @@ import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotation;
 import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotationEntry;
 import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotationTypeDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareCompositeModule;
-import xyz.cloudkeeper.model.bare.element.module.BareDeclarableModule;
+import xyz.cloudkeeper.model.bare.element.module.BareDeclaredPortsModule;
 import xyz.cloudkeeper.model.bare.element.module.BareInputModule;
 import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.bare.element.module.BareLoopModule;
@@ -410,7 +410,7 @@ public final class ModuleFactory {
         }
 
         final class ModuleVisitor implements BareModuleVisitor<Void, Void> {
-            private void addPorts(BareDeclarableModule declarableModule) {
+            private void addPorts(BareDeclaredPortsModule declarableModule) {
                 for (BarePort port: declarableModule.getDeclaredPorts()) {
                     scanAnnotations(port.getDeclaredAnnotations());
                     portTypeQueue.add(port.getType());

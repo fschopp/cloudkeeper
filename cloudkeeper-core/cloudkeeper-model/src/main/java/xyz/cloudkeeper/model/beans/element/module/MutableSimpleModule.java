@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "simple-module")
 public final class MutableSimpleModule
-        extends MutableDeclarableModule<MutableSimpleModule>
+        extends MutableDeclaredPortsModule<MutableSimpleModule>
         implements BareSimpleModule {
     private static final long serialVersionUID = -2753710509379024416L;
 

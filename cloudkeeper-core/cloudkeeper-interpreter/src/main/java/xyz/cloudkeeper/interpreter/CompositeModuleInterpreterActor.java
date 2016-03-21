@@ -18,7 +18,6 @@ import xyz.cloudkeeper.interpreter.DependencyGraph.ValueNode;
 import xyz.cloudkeeper.model.api.staging.StagingArea;
 import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeChildOutToParentOutConnection;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeConnection;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeConnectionVisitor;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInPort;

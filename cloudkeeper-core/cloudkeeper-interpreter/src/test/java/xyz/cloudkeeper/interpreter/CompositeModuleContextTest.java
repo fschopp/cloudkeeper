@@ -5,7 +5,6 @@ import org.testng.annotations.Test;
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModule;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModuleDeclaration;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInPort;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;

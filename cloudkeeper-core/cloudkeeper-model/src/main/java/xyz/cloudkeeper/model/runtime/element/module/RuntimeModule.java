@@ -96,4 +96,15 @@ public interface RuntimeModule extends RuntimeElement, BareModule, Immutable {
      * @return relative ID, or -1 if {@link #getParent()} is null
      */
     int getIndex();
+
+    /**
+     * Returns the module resulting from (recursively) resolving all invocations.
+     *
+     * <p>If the current module is a {@link RuntimeInvokeModule}, the resolved module is obtained by calling
+     * {@link RuntimeInvokeModule#getDeclaration()} and then {@link RuntimeModuleDeclaration#getTemplate()}. If the
+     * resolved module is {@link RuntimeInvokeModule}, the resolution process is repeated.
+     *
+     * @return the resolved module, guaranteed not to be a {@link RuntimeInvokeModule}
+     */
+    RuntimeModule resolveInvocations();
 }

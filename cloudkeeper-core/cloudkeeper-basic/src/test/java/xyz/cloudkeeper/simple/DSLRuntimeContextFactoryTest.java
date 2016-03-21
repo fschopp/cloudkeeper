@@ -10,7 +10,6 @@ import xyz.cloudkeeper.examples.modules.Fibonacci;
 import xyz.cloudkeeper.model.api.RuntimeContext;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeSimpleModuleDeclaration;
 
 import javax.annotation.Nullable;
 import java.net.URI;
