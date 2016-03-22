@@ -15,9 +15,9 @@ import xyz.cloudkeeper.model.runtime.execution.RuntimeExecutionTraceTarget;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeOverrideTarget;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeOverrideTargetVisitor;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 abstract class OverrideTargetImpl extends LocatableImpl implements RuntimeOverrideTarget {
     private OverrideTargetImpl(BareOverrideTarget original, CopyContext parentContext) throws LinkerException {
@@ -67,14 +67,14 @@ abstract class OverrideTargetImpl extends LocatableImpl implements RuntimeOverri
     final void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    final void preProcessFreezable(FinishContext context) { }
+    final void finishFreezable(FinishContext context) { }
 
     @Override
     final void verifyFreezable(VerifyContext context) { }
 
     private static final class ElementTargetImpl extends OverrideTargetImpl implements RuntimeElementTarget {
         private final NameReference elementReference;
-        private IElementImpl element;
+        @Nullable private volatile IElementImpl element;
 
         ElementTargetImpl(BareElementTarget original, CopyContext parentContext) throws LinkerException {
             super(original, parentContext);
@@ -96,12 +96,14 @@ abstract class OverrideTargetImpl extends LocatableImpl implements RuntimeOverri
 
         @Override
         public IElementImpl getElement() {
-            require(State.FINISHED);
-            return element;
+            require(State.LINKED);
+            @Nullable IElementImpl localElement = element;
+            assert localElement != null : "must be non-null when in state " + State.LINKED;
+            return localElement;
         }
 
         @Override
-        void finishFreezable(FinishContext context) throws LinkerException {
+        void preProcessFreezable(FinishContext context) throws LinkerException {
             element = context.resolveElement(elementReference);
         }
     }
@@ -135,7 +137,7 @@ abstract class OverrideTargetImpl extends LocatableImpl implements RuntimeOverri
         }
 
         @Override
-        void finishFreezable(FinishContext context) { }
+        void preProcessFreezable(FinishContext context) { }
     }
 
     private static final class ExecutionTraceTargetImpl extends OverrideTargetImpl
@@ -169,7 +171,7 @@ abstract class OverrideTargetImpl extends LocatableImpl implements RuntimeOverri
         }
 
         @Override
-        void finishFreezable(FinishContext context) { }
+        void preProcessFreezable(FinishContext context) { }
     }
 
     private static final class ElementExecutionTracePatternTargetImpl
@@ -202,6 +204,9 @@ abstract class OverrideTargetImpl extends LocatableImpl implements RuntimeOverri
         }
 
         @Override
-        void finishFreezable(FinishContext context) { }
+        void preProcessFreezable(FinishContext context) { }
     }
+
+    @Override
+    final void augmentFreezable(FinishContext context) { }
 }

@@ -9,16 +9,19 @@ import xyz.cloudkeeper.model.api.RuntimeStateProvisionException;
 import xyz.cloudkeeper.model.bare.element.annotation.BareAnnotationTypeElement;
 import xyz.cloudkeeper.model.bare.element.module.BareInPort;
 import xyz.cloudkeeper.model.bare.element.module.BareModule;
+import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareOutPort;
+import xyz.cloudkeeper.model.bare.element.module.BarePort;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.runtime.element.RuntimeElement;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
-import javax.lang.model.type.TypeKind;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
+import javax.lang.model.type.TypeKind;
 
 final class FinishContext {
     private static final Name CLOUD_KEEPER_ELEMENT_REFERENCE_NAME
@@ -252,7 +255,7 @@ final class FinishContext {
             ));
         }
         return new DeclaredTypeImpl(linker.getTypes(), new NoTypeImpl(linker.getTypes(), TypeKind.NONE),
-            objectDeclaration, ImmutableList.<TypeMirrorImpl>of());
+            objectDeclaration, ImmutableList.of());
     }
 
     IInPortImpl getParentInPort(SimpleNameReference fromPortReference) throws NotFoundException {
@@ -303,14 +306,38 @@ final class FinishContext {
     }
 
     @Nullable
-    Executable getExecutable(SimpleModuleImpl declaration) throws LinkerException {
+    Executable getExecutable(SimpleModuleBodyImpl simpleModuleBody) throws LinkerException {
+        URI uri = simpleModuleBody.getURI();
         try {
-            return linkerOptions.getExecutableProvider().provideExecutable(declaration.getQualifiedName()).orElse(null);
+            return linkerOptions.getExecutableProvider().provideExecutable(uri).orElse(null);
         } catch (RuntimeStateProvisionException exception) {
             throw new LinkerException(String.format(
-                "Could not resolve %s for simple-module declaration '%s'.",
-                Executable.class.getSimpleName(), declaration.getQualifiedName()
-            ), exception, declaration.getCopyContext().toLinkerTrace());
+                "Could not obtain %s for '%s'.",
+                Executable.class.getSimpleName(), uri
+            ), exception, simpleModuleBody.getCopyContext().toLinkerTrace());
         }
+    }
+
+    /**
+     * Returns the list of ports, similar to {@link ModuleImpl#getPorts()} but with weaker return type.
+     *
+     * @see InvokeModuleImpl#preProcessFreezable(FinishContext)
+     */
+    List<? extends BarePort> getBarePorts(ModuleDeclarationImpl moduleDeclaration)
+            throws LinkerException {
+        ModuleDeclarationImpl currentModuleDeclaration = moduleDeclaration;
+        ModuleImpl template;
+        while (true) {
+            template = currentModuleDeclaration.getTemplate();
+            if (template instanceof InvokeModuleImpl) {
+                NameReference nameReference = ((InvokeModuleImpl) template).getDeclarationReference();
+                currentModuleDeclaration
+                    = getDeclaration(BareModuleDeclaration.NAME, ModuleDeclarationImpl.class, nameReference);
+            } else {
+                break;
+            }
+        }
+
+        return template.getPorts();
     }
 }

@@ -1,22 +1,22 @@
 package xyz.cloudkeeper.linker;
 
 import xyz.cloudkeeper.model.LinkerException;
+import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleDeclaration;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
-import xyz.cloudkeeper.model.bare.element.module.BareInvokeModule;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.RuntimeElement;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleVisitor;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeInvokeModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleVisitor;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
     private final NameReference declarationReference;
@@ -51,9 +51,11 @@ final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
     }
 
     @Override
-    public ModuleDeclarationImpl getSuperAnnotatedConstruct() {
-        require(State.FINISHED);
-        return moduleDeclaration;
+    public ModuleImpl getSuperAnnotatedConstruct() {
+        require(State.LINKED);
+        @Nullable ModuleDeclarationImpl localModuleDeclaration = moduleDeclaration;
+        assert localModuleDeclaration != null;
+        return localModuleDeclaration.getTemplate();
     }
 
     /**
@@ -63,7 +65,7 @@ final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
      */
     @Override
     public ImmutableList<? extends IElementImpl> getEnclosedElements() {
-        require(State.LINKED);
+        require(State.AUGMENTED);
         @Nullable ImmutableList<PortImpl> localDeclaredPorts = declaredPorts;
         assert localDeclaredPorts != null : "must be non-null when linked";
         return localDeclaredPorts;
@@ -71,7 +73,7 @@ final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
 
     @Override
     public <T extends RuntimeElement> T getEnclosedElement(Class<T> clazz, SimpleName simpleName) {
-        require(State.LINKED);
+        require(State.AUGMENTED);
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(simpleName);
 
@@ -89,9 +91,9 @@ final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
 
     @Override
     public ModuleDeclarationImpl getDeclaration() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable ModuleDeclarationImpl localModuleDeclaration = moduleDeclaration;
-        assert localModuleDeclaration != null : "must be non-null when finished";
+        assert localModuleDeclaration != null : "must be non-null when in state " + State.LINKED;
         return localModuleDeclaration;
     }
 
@@ -103,57 +105,69 @@ final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
      */
     @Override
     public ImmutableList<PortImpl> getPorts() {
-        require(State.LINKED);
+        require(State.AUGMENTED);
         @Nullable ImmutableList<PortImpl> localDeclaredPorts = declaredPorts;
-        assert localDeclaredPorts != null : "must be non-null when linked";
+        assert localDeclaredPorts != null : "must be non-null when in state " + State.FINISHED;
         return localDeclaredPorts;
     }
 
     @Override
     public ImmutableList<IInPortImpl> getInPorts() {
-        require(State.LINKED);
+        require(State.AUGMENTED);
         @Nullable ImmutableList<IInPortImpl> localInPorts = inPorts;
-        assert localInPorts != null : "must be non-null when linked";
+        assert localInPorts != null : "must be non-null when in state " + State.FINISHED;
         return localInPorts;
     }
 
     @Override
     public ImmutableList<IOutPortImpl> getOutPorts() {
-        require(State.LINKED);
+        require(State.AUGMENTED);
         @Nullable ImmutableList<IOutPortImpl> localOutPorts = outPorts;
-        assert localOutPorts != null : "must be non-null when linked";
+        assert localOutPorts != null : "must be non-null when in state " + State.FINISHED;
         return localOutPorts;
     }
 
     @Override
     void collectEnclosedByAnnotatedConstruct(Collection<AbstractFreezable> freezables) {
-        require(State.LINKED);
         @Nullable ImmutableList<PortImpl> localDeclaredPort = declaredPorts;
-        assert localDeclaredPort != null : "must be non-null when linked";
-        freezables.addAll(localDeclaredPort);
+        if (localDeclaredPort != null) {
+            freezables.addAll(localDeclaredPort);
+        }
+    }
+
+    @Override
+    public ModuleImpl resolveInvocations() {
+        ModuleImpl module = this;
+        while (module instanceof InvokeModuleImpl) {
+            module = ((InvokeModuleImpl) module).getDeclaration().getTemplate();
+        }
+        return module;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Before linking, we do not have any information about our ports. This method adds concrete port instances.
-     * Note that the referenced module declarations (either composite module or simple module) can not contain implicit
-     * ports.
+     * Returns the referenced module declaration as {@link NameReference} object.
      */
-    @Override
-    void preProcessFreezable(FinishContext context) throws LinkerException {
-        ModuleDeclarationImpl localModuleDeclaration
-            = context.getDeclaration(BareModuleDeclaration.NAME, ModuleDeclarationImpl.class, declarationReference);
-        moduleDeclaration = localModuleDeclaration;
+    NameReference getDeclarationReference() {
+        return declarationReference;
+    }
 
+    @Override
+    void preProcessModule(FinishContext context) throws LinkerException {
+        moduleDeclaration
+            = context.getDeclaration(BareModuleDeclaration.NAME, ModuleDeclarationImpl.class, declarationReference);
+    }
+
+    @Override
+    void augmentFreezable(FinishContext context) throws LinkerException {
+        @Nullable ModuleDeclarationImpl localModuleDeclaration = moduleDeclaration;
+        assert localModuleDeclaration != null;
+
+        // Add missing ports
         CopyContext copyContext = getCopyContext();
-        // Add missing ports. At link time, instances of this package may not yet be fully constructed, and we can
-        // therefore not rely on ModuleImpl#getPorts(). Instead, ModuleDeclarationImpl provides
-        // getBarePorts() for this purpose.
         PortAccumulationState state = new PortAccumulationState();
         Map<SimpleName, PortImpl> newPortMap = new LinkedHashMap<>();
         collect(
-            localModuleDeclaration.getBarePorts(),
+            context.getBarePorts(localModuleDeclaration),
             copyContext.newSystemContext("declared ports of " + declarationReference)
                 .newContextForListProperty("barePorts"),
             portConstructor(state),
@@ -166,11 +180,14 @@ final class InvokeModuleImpl extends ModuleImpl implements RuntimeInvokeModule {
         declaredPorts = ImmutableList.copyOf(newPortMap.values());
         inPorts = ImmutableList.copyOf(state.getInPorts());
         outPorts = ImmutableList.copyOf(state.getOutPorts());
+
+        // We need to manually link the ports, as they were created while we were already in state State.LINKED
+        FinishContext contextForContained = context.newChildContext(this);
+        for (PortImpl port: newPortMap.values()) {
+            port.linkProxyModules(contextForContained);
+        }
     }
 
     @Override
-    void finishModule(FinishContext context) { }
-
-    @Override
-    void verifyFreezable(VerifyContext context) { }
+    void verifyModule(VerifyContext context) { }
 }

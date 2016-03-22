@@ -50,5 +50,5 @@ final class ByteSequenceImpl extends SerializationNodeImpl implements RuntimeByt
     void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    void finishFreezable(FinishContext context) { }
+    void preProcessFreezable(FinishContext context) { }
 }

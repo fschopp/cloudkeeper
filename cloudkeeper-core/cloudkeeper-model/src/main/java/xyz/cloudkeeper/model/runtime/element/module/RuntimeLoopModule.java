@@ -7,4 +7,7 @@ public interface RuntimeLoopModule extends RuntimeParentModule, BareLoopModule {
      * Returns the continue-port of this loop module.
      */
     RuntimeOutPort getContinuePort();
+
+    @Override
+    RuntimeLoopModule resolveInvocations();
 }

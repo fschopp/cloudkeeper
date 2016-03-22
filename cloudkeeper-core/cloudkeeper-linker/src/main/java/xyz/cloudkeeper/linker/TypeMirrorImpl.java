@@ -14,11 +14,11 @@ import xyz.cloudkeeper.model.runtime.element.module.TypeRelationship;
 import xyz.cloudkeeper.model.runtime.type.RuntimeTypeMirror;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
-import javax.lang.model.element.AnnotationMirror;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nullable;
+import javax.lang.model.element.AnnotationMirror;
 
 abstract class TypeMirrorImpl extends LocatableImpl implements RuntimeTypeMirror, AnnotatedConstruct {
     @Nullable private volatile CloudKeeperTypeReflection types;
@@ -144,7 +144,7 @@ abstract class TypeMirrorImpl extends LocatableImpl implements RuntimeTypeMirror
         return getTypes().toString(this);
     }
 
-    static UnsupportedOperationException unsupportedException() {
+    private static UnsupportedOperationException unsupportedException() {
         return new UnsupportedOperationException(String.format(
             "Annotations not currently supported by %s and subclasses.", TypeMirrorImpl.class
         ));
@@ -166,7 +166,7 @@ abstract class TypeMirrorImpl extends LocatableImpl implements RuntimeTypeMirror
     }
 
     final CloudKeeperTypeReflection getTypes() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable CloudKeeperTypeReflection localTypes = types;
         assert localTypes != null : "must be non-null when finished";
         return localTypes;
@@ -186,13 +186,16 @@ abstract class TypeMirrorImpl extends LocatableImpl implements RuntimeTypeMirror
     }
 
     @Override
-    final void preProcessFreezable(FinishContext context) { }
-
-    @Override
-    final void finishFreezable(FinishContext context) throws LinkerException {
+    final void preProcessFreezable(FinishContext context) throws LinkerException {
         types = context.getTypes();
-        finishTypeMirror(context);
+        preProcessTypeMirror(context);
     }
 
-    abstract void finishTypeMirror(FinishContext context) throws LinkerException;
+    abstract void preProcessTypeMirror(FinishContext context) throws LinkerException;
+
+    @Override
+    final void augmentFreezable(FinishContext context) { }
+
+    @Override
+    final void finishFreezable(FinishContext context) { }
 }

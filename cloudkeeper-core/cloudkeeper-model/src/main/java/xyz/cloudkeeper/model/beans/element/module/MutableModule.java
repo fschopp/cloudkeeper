@@ -77,7 +77,7 @@ public abstract class MutableModule<D extends MutableModule<D>>
         @Override
         public MutableModule<?> visitLinkedModule(BareInvokeModule proxyModule, @Nullable CopyOption[] copyOptions) {
             assert copyOptions != null;
-            return MutableInvokeModule.copyOfProxyModule(proxyModule, copyOptions);
+            return MutableInvokeModule.copyOfInvokeModule(proxyModule, copyOptions);
         }
 
         @Override

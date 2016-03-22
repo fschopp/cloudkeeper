@@ -21,8 +21,8 @@ final class AnnotationTypeElementImpl
     @Nullable private final TypeMirrorImpl typeOfDefaultValue;
     @Nullable private final AnnotationValueImpl defaultValue;
 
-    private volatile AnnotationTypeDeclarationImpl enclosingElement;
-    private volatile Name qualifiedName;
+    @Nullable private volatile AnnotationTypeDeclarationImpl enclosingElement;
+    @Nullable private volatile Name qualifiedName;
 
     AnnotationTypeElementImpl(BareAnnotationTypeElement original, CopyContext parentContext) throws LinkerException {
         super(original, parentContext);
@@ -82,7 +82,10 @@ final class AnnotationTypeElementImpl
 
     @Override
     public AnnotationTypeDeclarationImpl getEnclosingElement() {
-        return enclosingElement;
+        require(State.LINKED);
+        @Nullable AnnotationTypeDeclarationImpl localEnclosingElement = enclosingElement;
+        assert localEnclosingElement != null;
+        return localEnclosingElement;
     }
 
     @Override
@@ -97,8 +100,10 @@ final class AnnotationTypeElementImpl
 
     @Override
     public Name getQualifiedName() {
-        require(State.FINISHED);
-        return qualifiedName;
+        require(State.LINKED);
+        @Nullable Name localName = qualifiedName;
+        assert localName != null;
+        return localName;
     }
 
     @Override
@@ -118,12 +123,6 @@ final class AnnotationTypeElementImpl
     }
 
     @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
-        enclosingElement = context.getRequiredEnclosingFreezable(AnnotationTypeDeclarationImpl.class);
-        qualifiedName = enclosingElement.getQualifiedName().join(simpleName);
-    }
-
-    @Override
     void collectEnclosedByAnnotatedConstruct(Collection<AbstractFreezable> freezables) {
         freezables.add(returnType);
         if (typeOfDefaultValue != null) {
@@ -132,7 +131,18 @@ final class AnnotationTypeElementImpl
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
+    void preProcessFreezable(FinishContext context) {
+        AnnotationTypeDeclarationImpl localEnclosingElement
+            = context.getRequiredEnclosingFreezable(AnnotationTypeDeclarationImpl.class);
+        enclosingElement = localEnclosingElement;
+        qualifiedName = localEnclosingElement.getQualifiedName().join(simpleName);
+    }
+
+    @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
+    void finishFreezable(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) throws LinkerException {

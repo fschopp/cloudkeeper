@@ -1,5 +1,9 @@
 package xyz.cloudkeeper.linker;
 
+import static xyz.cloudkeeper.model.runtime.element.module.TypeRelationship.APPLY_TO_ALL;
+import static xyz.cloudkeeper.model.runtime.element.module.TypeRelationship.INCOMPATIBLE;
+import static xyz.cloudkeeper.model.runtime.element.module.TypeRelationship.MERGE;
+
 import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.module.BareChildOutToParentOutConnection;
 import xyz.cloudkeeper.model.bare.element.module.BareConnection;
@@ -17,13 +21,9 @@ import xyz.cloudkeeper.model.runtime.element.module.RuntimeShortCircuitConnectio
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeSiblingConnection;
 import xyz.cloudkeeper.model.runtime.element.module.TypeRelationship;
 
+import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-
-import static xyz.cloudkeeper.model.runtime.element.module.TypeRelationship.APPLY_TO_ALL;
-import static xyz.cloudkeeper.model.runtime.element.module.TypeRelationship.INCOMPATIBLE;
-import static xyz.cloudkeeper.model.runtime.element.module.TypeRelationship.MERGE;
 
 abstract class ConnectionImpl extends LocatableImpl implements RuntimeConnection {
     private final SimpleNameReference fromPortReference;
@@ -157,7 +157,7 @@ abstract class ConnectionImpl extends LocatableImpl implements RuntimeConnection
         }
 
         @Override
-        void preProcessConnection(FinishContext context) throws LinkerException {
+        void finishFreezable(FinishContext context) throws LinkerException {
             fromPort = context.getChildOutPort(fromModuleReference, getFromPortReference());
             toPort = context.getChildInPort(toModuleReference, getToPortReference());
             fromPort.addOutgoingConnection(this);
@@ -217,7 +217,7 @@ abstract class ConnectionImpl extends LocatableImpl implements RuntimeConnection
         }
 
         @Override
-        void preProcessConnection(FinishContext context) throws LinkerException {
+        void finishFreezable(FinishContext context) throws LinkerException {
             fromPort = context.getParentInPort(getFromPortReference());
             toPort = context.getChildInPort(toModuleReference, getToPortReference());
             fromPort.addOutgoingConnection(this);
@@ -281,7 +281,7 @@ abstract class ConnectionImpl extends LocatableImpl implements RuntimeConnection
         }
 
         @Override
-        void preProcessConnection(FinishContext context) throws LinkerException {
+        void finishFreezable(FinishContext context) throws LinkerException {
             fromPort = context.getChildOutPort(fromModuleReference, getFromPortReference());
             toPort = context.getParentOutPort(getToPortReference());
             fromPort.addOutgoingConnection(this);
@@ -336,7 +336,7 @@ abstract class ConnectionImpl extends LocatableImpl implements RuntimeConnection
         void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
         @Override
-        void preProcessConnection(FinishContext context) throws LinkerException {
+        void finishFreezable(FinishContext context) throws LinkerException {
             fromPort = context.getParentInPort(getFromPortReference());
             toPort = context.getParentOutPort(getToPortReference());
             fromPort.addOutgoingConnection(this);
@@ -397,13 +397,10 @@ abstract class ConnectionImpl extends LocatableImpl implements RuntimeConnection
     @Override
     final void preProcessFreezable(FinishContext context) throws LinkerException {
         parent = context.getRequiredEnclosingFreezable(ParentModuleImpl.class);
-        preProcessConnection(context);
     }
 
-    abstract void preProcessConnection(FinishContext context) throws LinkerException;
-
     @Override
-    final void finishFreezable(FinishContext context) { }
+    final void augmentFreezable(FinishContext context) { }
 
     @Override
     final void verifyFreezable(VerifyContext context) throws LinkerException {

@@ -113,15 +113,15 @@ abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModul
     @Override
     @Nullable
     public IElementImpl getEnclosingElement() {
-        require(State.FINISHED);
+        require(State.LINKED);
         return enclosingElement;
     }
 
     @Override
     public Name getQualifiedName() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable Name localQualifiedName = qualifiedName;
-        assert localQualifiedName != null : "must be non-null when finished";
+        assert localQualifiedName != null : "must be non-null when in state " + State.LINKED;
         return localQualifiedName;
     }
 
@@ -133,7 +133,7 @@ abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModul
 
     @Override
     public final ParentModuleImpl getParent() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable IElementImpl localEnclosingElement = enclosingElement;
         return localEnclosingElement instanceof ParentModuleImpl
             ? (ParentModuleImpl) localEnclosingElement
@@ -159,14 +159,13 @@ abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModul
     }
 
     @Override
-    final void finishFreezable(FinishContext context) throws LinkerException {
+    public abstract ModuleImpl resolveInvocations();
+
+    @Override
+    final void preProcessFreezable(FinishContext context) throws LinkerException {
         @Nullable IElementImpl localEnclosingElement
             = context.getOptionalEnclosingFreezable(IElementImpl.class).orElse(null);
         enclosingElement = localEnclosingElement;
-        Preconditions.requireCondition((name != null) == (enclosingElement instanceof ParentModuleImpl),
-            getCopyContext(),
-            "Expected non-empty module name if and only if module has an enclosing parent module."
-        );
         if (localEnclosingElement instanceof ParentModuleImpl) {
             assert name != null;
             qualifiedName = localEnclosingElement.getQualifiedName().join(name);
@@ -176,8 +175,22 @@ abstract class ModuleImpl extends AnnotatedConstructImpl implements RuntimeModul
         } else {
             qualifiedName = SimpleName.identifier(BareModuleDeclaration.TEMPLATE_ELEMENT_NAME);
         }
-        finishModule(context);
+        preProcessModule(context);
     }
 
-    abstract void finishModule(FinishContext context) throws LinkerException;
+    abstract void preProcessModule(FinishContext context) throws LinkerException;
+
+    @Override
+    final void finishFreezable(FinishContext context) { }
+
+    @Override
+    final void verifyFreezable(VerifyContext context) throws LinkerException {
+        Preconditions.requireCondition((name != null) == (enclosingElement instanceof ParentModuleImpl),
+            getCopyContext(),
+            "Expected non-empty module name if and only if module has an enclosing parent module."
+        );
+        verifyModule(context);
+    }
+
+    abstract void verifyModule(VerifyContext context) throws LinkerException;
 }

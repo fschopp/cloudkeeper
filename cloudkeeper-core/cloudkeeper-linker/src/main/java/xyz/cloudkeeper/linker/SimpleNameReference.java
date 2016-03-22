@@ -37,6 +37,9 @@ final class SimpleNameReference extends LocatableImpl implements BareSimpleNamea
     void preProcessFreezable(FinishContext context) { }
 
     @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
     void finishFreezable(FinishContext context) { }
 
     @Override

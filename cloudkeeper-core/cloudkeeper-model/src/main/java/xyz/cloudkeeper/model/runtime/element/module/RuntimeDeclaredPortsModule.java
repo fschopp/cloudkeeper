@@ -6,4 +6,7 @@ import xyz.cloudkeeper.model.util.ImmutableList;
 public interface RuntimeDeclaredPortsModule extends RuntimeModule, BareDeclaredPortsModule {
     @Override
     ImmutableList<? extends RuntimePort> getDeclaredPorts();
+
+    @Override
+    RuntimeDeclaredPortsModule resolveInvocations();
 }

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType(propOrder = { "declaredPorts", "modules", "connections" })
+@XmlType(propOrder = { "modules", "connections" })
 public abstract class MutableParentModule<D extends MutableParentModule<D>>
         extends MutableDeclaredPortsModule<D>
         implements BareParentModule {

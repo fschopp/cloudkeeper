@@ -4,12 +4,12 @@ import net.florianschoppmann.java.type.IntersectionType;
 import xyz.cloudkeeper.model.bare.type.BareTypeMirrorVisitor;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeVisitor;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import javax.annotation.Nullable;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeVisitor;
 
 final class IntersectionTypeImpl extends TypeMirrorImpl implements IntersectionType {
     private final ImmutableList<TypeMirrorImpl> bounds;
@@ -89,7 +89,7 @@ final class IntersectionTypeImpl extends TypeMirrorImpl implements IntersectionT
     void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    void finishTypeMirror(FinishContext context) { }
+    void preProcessTypeMirror(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) {

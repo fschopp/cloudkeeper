@@ -6,13 +6,13 @@ import xyz.cloudkeeper.model.LinkerException;
 import xyz.cloudkeeper.model.bare.element.module.BarePort;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * Skeletal abstract base class for instances with a lifecycle, which starts in a building phase, and eventually
@@ -32,15 +32,36 @@ import java.util.Map;
  */
 abstract class AbstractFreezable {
     enum State {
+        /**
+         * Initial state.
+         */
         CREATED,
+
+        /**
+         * Symbolic references to static elements have been resolved.
+         */
         LINKED,
 
         /**
-         * An instance in this state is ready to be used. All interface methods are expected to give expected results
+         * Dynamically generated elements have been added to the intermediate representation.
+         *
+         * <p>For example, ports have been added to {@link InvokeModuleImpl} instances (these are initially copies of
+         * the module contained in the declaration).
+         */
+        AUGMENTED,
+
+        /**
+         * Symbolic references to static <em>and</em> dynamically generated elements have been resolved.
+         *
+         * <p>An instance in this state is ready to be used. All interface methods are expected to give expected results
          * that are immutable and consistent. However, some methods may trigger on-the-fly computations (as opposed to
          * just returning cached results).
          */
         FINISHED,
+
+        /**
+         * All constraints have been verified and cached values have been precomputed.
+         */
         PRECOMPUTED
     }
 
@@ -96,6 +117,21 @@ abstract class AbstractFreezable {
     abstract void collectEnclosed(Collection<AbstractFreezable> freezables);
 
     /**
+     * Throws an {@link IllegalStateException} if the given argument is {@code null}.
+     *
+     * @throws IllegalStateException if the given argument is null
+     */
+    final <T> T requireNotNull(@Nullable T value) {
+        if (value == null) {
+            throw new IllegalStateException(String.format(
+                "Expected instance of %s to have property, but property value is null. Current state is %s.",
+                getClass(), state
+            ));
+        }
+        return value;
+    }
+
+    /**
      * Throws an {@link IllegalStateException} if this instance is not in or after the given state.
      *
      * @throws IllegalStateException if this instance is not in or after the given state
@@ -126,6 +162,8 @@ abstract class AbstractFreezable {
     /**
      * Resolves the ports in all {@link InvokeModuleImpl} and {@link ConnectionImpl} instances.
      *
+     * <p>This method resolves all symbolic references.
+     *
      * <p>Just the {@link #finish(FinishContext)} method is not enough for the following reason. We need to make two
      * passes over our descendants: First, add ports to all {@link InvokeModuleImpl} instances. Only then, we can finish
      * construction. Otherwise, we run into a cyclic dependency:
@@ -155,6 +193,20 @@ abstract class AbstractFreezable {
 
     abstract void preProcessFreezable(FinishContext context) throws LinkerException;
 
+    final void augment(FinishContext context) throws LinkerException {
+        require(State.LINKED);
+        requireNot(State.AUGMENTED);
+        augmentFreezable(context);
+        state = State.AUGMENTED;
+
+        FinishContext contextForContained = context.newChildContext(this);
+        for (AbstractFreezable freezable: getEnclosedFreezables()) {
+            freezable.augment(contextForContained);
+        }
+    }
+
+    abstract void augmentFreezable(FinishContext context) throws LinkerException;
+
     /**
      * Finish construction of this instance by resolving by-name references into Java object references.
      *
@@ -164,7 +216,7 @@ abstract class AbstractFreezable {
      * @param context context for finishing construction
      */
     final void finish(FinishContext context) throws LinkerException  {
-        require(State.LINKED);
+        require(State.AUGMENTED);
         requireNot(State.FINISHED);
         finishFreezable(context);
         state = State.FINISHED;
@@ -202,6 +254,7 @@ abstract class AbstractFreezable {
 
     final void complete(FinishContext finishContext, VerifyContext verifyContext) throws LinkerException {
         linkProxyModules(finishContext);
+        augment(finishContext);
         finish(finishContext);
         verify(verifyContext);
     }

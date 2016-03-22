@@ -113,12 +113,15 @@ final class LinkerImpl extends AbstractFreezable {
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
-
-    @Override
-    void finishFreezable(FinishContext context) {
+    void preProcessFreezable(FinishContext context) {
         typeReflection.complete(systemBundle);
     }
+
+    @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
+    void finishFreezable(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

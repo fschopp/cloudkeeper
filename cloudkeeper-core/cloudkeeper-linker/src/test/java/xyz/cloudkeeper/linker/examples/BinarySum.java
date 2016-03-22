@@ -22,6 +22,7 @@ public final class BinarySum {
             .setSimpleName(BinarySum.class.getSimpleName())
             .setTemplate(
                 new MutableSimpleModule()
+                    .setDefinition("x-example:" + BinarySum.class.getName())
                     .setDeclaredPorts(Arrays.asList(
                         new MutableInPort()
                             .setSimpleName("num1")

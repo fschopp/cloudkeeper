@@ -30,4 +30,7 @@ public interface RuntimeParentModule extends BareParentModule, RuntimeDeclaredPo
 
     @Override
     ImmutableList<? extends RuntimeConnection> getConnections();
+
+    @Override
+    RuntimeParentModule resolveInvocations();
 }

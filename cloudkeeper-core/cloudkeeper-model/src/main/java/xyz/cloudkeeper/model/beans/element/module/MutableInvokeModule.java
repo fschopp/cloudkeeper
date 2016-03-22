@@ -24,7 +24,8 @@ public final class MutableInvokeModule extends MutableModule<MutableInvokeModule
     }
 
     @Nullable
-    public static MutableInvokeModule copyOfProxyModule(@Nullable BareInvokeModule original, CopyOption... copyOptions) {
+    public static MutableInvokeModule copyOfInvokeModule(
+            @Nullable BareInvokeModule original, CopyOption... copyOptions) {
         return original == null
             ? null
             : new MutableInvokeModule(original, copyOptions);

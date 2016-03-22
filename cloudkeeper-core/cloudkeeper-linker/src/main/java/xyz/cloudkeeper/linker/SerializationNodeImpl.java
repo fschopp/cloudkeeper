@@ -69,7 +69,10 @@ abstract class SerializationNodeImpl extends LocatableImpl implements RuntimeSer
     }
 
     @Override
-    final void preProcessFreezable(FinishContext context) { }
+    final void augmentFreezable(FinishContext context) { }
+
+    @Override
+    final void finishFreezable(FinishContext context) { }
 
     @Override
     final void verifyFreezable(VerifyContext context) { }

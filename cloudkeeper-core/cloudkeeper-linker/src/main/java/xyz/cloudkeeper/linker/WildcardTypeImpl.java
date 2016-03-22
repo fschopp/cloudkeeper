@@ -10,13 +10,13 @@ import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.runtime.type.RuntimeWildcardType;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Objects;
 
 final class WildcardTypeImpl extends TypeMirrorImpl implements RuntimeWildcardType, WildcardType {
     @Nullable private final TypeMirrorImpl extendsBound;
@@ -92,7 +92,7 @@ final class WildcardTypeImpl extends TypeMirrorImpl implements RuntimeWildcardTy
 
     @Override
     public ImmutableList<TypeDeclarationImpl> asTypeDeclaration() {
-        require(State.FINISHED);
+        require(State.LINKED);
         // No synchronization/volatile needed because reference read/writes are atomic due to JLS §17.7.
         @Nullable ImmutableList<TypeDeclarationImpl> localTypeDeclarations = typeDeclarations;
         if (localTypeDeclarations == null) {
@@ -137,7 +137,7 @@ final class WildcardTypeImpl extends TypeMirrorImpl implements RuntimeWildcardTy
     }
 
     @Override
-    void finishTypeMirror(FinishContext context) { }
+    void preProcessTypeMirror(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) {

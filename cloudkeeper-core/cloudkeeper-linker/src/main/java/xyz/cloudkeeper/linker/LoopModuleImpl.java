@@ -8,6 +8,7 @@ import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeLoopModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeModule;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleVisitor;
 
 import javax.annotation.Nullable;
@@ -50,6 +51,11 @@ final class LoopModuleImpl extends ParentModuleImpl implements RuntimeLoopModule
     @Nullable
     public <T, P> T accept(RuntimeModuleVisitor<T, P> visitor, @Nullable P parameter) {
         return visitor.visit(this, parameter);
+    }
+
+    @Override
+    public LoopModuleImpl resolveInvocations() {
+        return this;
     }
 
     @Override

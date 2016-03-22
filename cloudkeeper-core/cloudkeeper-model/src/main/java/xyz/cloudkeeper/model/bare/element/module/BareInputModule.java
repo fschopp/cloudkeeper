@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 /**
  * Input module.
  */
-public interface BareInputModule extends BareDeclarableModule {
+public interface BareInputModule extends BareModule {
     /**
      * Human-readable name of the entity modeled by this interface.
      */

@@ -16,6 +16,7 @@ public final class Decrease {
             .setSimpleName(Decrease.class.getSimpleName())
             .setTemplate(
                 new MutableSimpleModule()
+                    .setDefinition("x-example:" + Decrease.class.getName())
                     .setDeclaredPorts(Arrays.asList(
                         new MutableInPort()
                             .setSimpleName("num")

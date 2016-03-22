@@ -60,9 +60,9 @@ final class TypeVariableImpl extends TypeMirrorImpl implements RuntimeTypeVariab
             return false;
         }
 
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable TypeParameterElementImpl localFormalTypeParameter = formalTypeParameter;
-        assert localFormalTypeParameter != null : "must be non-null when finished";
+        assert localFormalTypeParameter != null : "must be non-null when in state " + State.LINKED;
 
         TypeVariableImpl other = (TypeVariableImpl) otherObject;
         return localFormalTypeParameter.equals(other.formalTypeParameter)
@@ -89,7 +89,7 @@ final class TypeVariableImpl extends TypeMirrorImpl implements RuntimeTypeVariab
 
     @Override
     public ImmutableList<TypeDeclarationImpl> asTypeDeclaration() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable ImmutableList<TypeDeclarationImpl> localTypeDeclarations = typeDeclarations;
         if (localTypeDeclarations == null) {
             // Preliminarily set typeDeclarations to a non-null value, in order to avoid infinite recursion in
@@ -130,7 +130,7 @@ final class TypeVariableImpl extends TypeMirrorImpl implements RuntimeTypeVariab
     @Override
     @Nonnull
     public TypeParameterElementImpl getFormalTypeParameter() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable TypeParameterElementImpl localFormalTypeParameter = formalTypeParameter;
         assert localFormalTypeParameter != null : "must be non-null when finished";
         return localFormalTypeParameter;
@@ -138,7 +138,7 @@ final class TypeVariableImpl extends TypeMirrorImpl implements RuntimeTypeVariab
 
     @Override
     public TypeMirrorImpl getUpperBound() {
-        require(State.FINISHED);
+        require(State.LINKED);
 
         @Nullable TypeMirrorImpl localUpperBound = upperBound;
         if (localUpperBound == null) {
@@ -152,7 +152,7 @@ final class TypeVariableImpl extends TypeMirrorImpl implements RuntimeTypeVariab
 
     @Override
     public TypeMirrorImpl getLowerBound() {
-        require(State.FINISHED);
+        require(State.LINKED);
 
         @Nullable TypeMirrorImpl localLowerBound = lowerBound;
         if (localLowerBound == null) {
@@ -183,8 +183,8 @@ final class TypeVariableImpl extends TypeMirrorImpl implements RuntimeTypeVariab
     void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    void finishTypeMirror(FinishContext context) throws LinkerException {
-        assert simpleNameReference != null : "must be non-null when finish is called";
+    void preProcessTypeMirror(FinishContext context) throws LinkerException {
+        assert simpleNameReference != null : "must be non-null if created unfinished";
         formalTypeParameter = context.getTypeParameter(simpleNameReference);
     }
 

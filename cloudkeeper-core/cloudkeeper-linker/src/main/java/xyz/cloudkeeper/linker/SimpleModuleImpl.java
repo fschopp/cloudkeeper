@@ -1,7 +1,6 @@
 package xyz.cloudkeeper.linker;
 
 import xyz.cloudkeeper.model.LinkerException;
-import xyz.cloudkeeper.model.api.Executable;
 import xyz.cloudkeeper.model.bare.element.module.BareModuleVisitor;
 import xyz.cloudkeeper.model.bare.element.module.BarePort;
 import xyz.cloudkeeper.model.bare.element.module.BareSimpleModule;
@@ -25,10 +24,11 @@ final class SimpleModuleImpl extends ModuleImpl implements RuntimeSimpleModule {
     private final ImmutableList<PortImpl> declaredPorts;
     private final ImmutableList<IInPortImpl> inPorts;
     private final ImmutableList<IOutPortImpl> outPorts;
-    @Nullable private volatile Executable executable;
+    private final SimpleModuleBodyImpl simpleModuleBody;
 
-    SimpleModuleImpl(BareSimpleModule original, CopyContext parentContext, int index) throws LinkerException {
+    SimpleModuleImpl(@Nullable BareSimpleModule original, CopyContext parentContext, int index) throws LinkerException {
         super(original, parentContext, index);
+        assert original != null;
 
         List<? extends BarePort> originalPorts = original.getDeclaredPorts();
 
@@ -47,6 +47,9 @@ final class SimpleModuleImpl extends ModuleImpl implements RuntimeSimpleModule {
         declaredPorts = ImmutableList.copyOf(newPortMap.values());
         inPorts = ImmutableList.copyOf(state.getInPorts());
         outPorts = ImmutableList.copyOf(state.getOutPorts());
+
+        simpleModuleBody
+            = new SimpleModuleBodyImpl(original.getDefinition(), getCopyContext().newContextForProperty("definition"));
     }
 
     @Override
@@ -118,31 +121,27 @@ final class SimpleModuleImpl extends ModuleImpl implements RuntimeSimpleModule {
     }
 
     @Override
-    public Executable getDefinition() {
-        require(State.FINISHED);
-        @Nullable Executable localExecutable = executable;
-        if (localExecutable == null) {
-            throw new IllegalStateException(String.format(
-                "toExecutable() called on %s even though instance is not available. This indicates invalid linker "
-                    + "options.", this
-            ));
-        }
-        return localExecutable;
+    public SimpleModuleBodyImpl getDefinition() {
+        return simpleModuleBody;
+    }
+
+    @Override
+    public SimpleModuleImpl resolveInvocations() {
+        return this;
     }
 
     @Override
     void collectEnclosedByAnnotatedConstruct(Collection<AbstractFreezable> freezables) {
         freezables.addAll(declaredPorts);
+        freezables.add(simpleModuleBody);
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
+    void preProcessModule(FinishContext context) { }
 
     @Override
-    void finishModule(FinishContext context) throws LinkerException {
-        executable = context.getExecutable(this);
-    }
+    void augmentFreezable(FinishContext context) { }
 
     @Override
-    void verifyFreezable(VerifyContext context) { }
+    void verifyModule(VerifyContext context) { }
 }

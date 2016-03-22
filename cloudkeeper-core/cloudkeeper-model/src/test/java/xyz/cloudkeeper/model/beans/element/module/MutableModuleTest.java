@@ -19,8 +19,13 @@ public class MutableModuleTest {
     @Factory
     public Object[] contracts() {
         List<Object> contractsList = new ArrayList<>();
-        contractsList.addAll(Arrays.asList(MutableLocatableContract.contractsFor(MutableCompositeModule.class,
-            MutableInputModule.class, MutableLoopModule.class, MutableInvokeModule.class)));
+        contractsList.addAll(Arrays.asList(MutableLocatableContract.contractsFor(
+            MutableCompositeModule.class,
+            MutableInputModule.class,
+            MutableLoopModule.class,
+            MutableInvokeModule.class,
+            MutableSimpleModule.class
+        )));
         contractsList.add(new XmlRootElementContract(
             new MutableInputModule()
                 .setRaw(

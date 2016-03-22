@@ -77,12 +77,15 @@ abstract class PluginDeclarationImpl extends AnnotatedConstructImpl implements R
         return simpleName;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method may be called already from method {@link #preProcessPluginDeclaration(FinishContext)}; that is,
+     * even before the state becomes {@link State#LINKED}.
+     */
     @Override
     public final Name getQualifiedName() {
-        require(State.LINKED);
-        @Nullable Name localQualifiedName = qualifiedName;
-        assert localQualifiedName != null : "must be non-null when in state " + State.LINKED;
-        return localQualifiedName;
+        return requireNotNull(qualifiedName);
     }
 
     @Override
@@ -94,9 +97,18 @@ abstract class PluginDeclarationImpl extends AnnotatedConstructImpl implements R
     }
 
     @Override
-    final void preProcessFreezable(FinishContext context) {
+    final void preProcessFreezable(FinishContext context) throws LinkerException {
         IElementImpl enclosingElement = context.getRequiredEnclosingFreezable(IElementImpl.class);
         qualifiedName = enclosingElement.getQualifiedName().join(simpleName);
         enclosingPackage = context.getRequiredEnclosingFreezable(PackageImpl.class);
+        preProcessPluginDeclaration(context);
     }
+
+    abstract void preProcessPluginDeclaration(FinishContext context) throws LinkerException;
+
+    @Override
+    final void augmentFreezable(FinishContext context) { }
+
+    @Override
+    final void finishFreezable(FinishContext context) { }
 }

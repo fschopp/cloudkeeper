@@ -8,5 +8,5 @@ import javax.annotation.Nonnull;
 public interface RuntimeModuleDeclaration extends RuntimePluginDeclaration, BareModuleDeclaration {
     @Override
     @Nonnull
-    RuntimeDeclarableModule getTemplate();
+    RuntimeModule getTemplate();
 }

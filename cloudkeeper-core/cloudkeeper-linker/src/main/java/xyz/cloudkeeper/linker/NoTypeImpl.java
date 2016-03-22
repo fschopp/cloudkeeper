@@ -8,12 +8,12 @@ import xyz.cloudkeeper.model.immutable.Location;
 import xyz.cloudkeeper.model.runtime.type.RuntimeNoType;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
+import java.util.Collection;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.lang.model.type.NoType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeVisitor;
-import java.util.Collection;
-import java.util.Objects;
 
 final class NoTypeImpl extends TypeMirrorImpl implements RuntimeNoType, NoType {
     private final TypeKind typeKind;
@@ -98,7 +98,7 @@ final class NoTypeImpl extends TypeMirrorImpl implements RuntimeNoType, NoType {
     void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    void finishTypeMirror(FinishContext context) { }
+    void preProcessTypeMirror(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

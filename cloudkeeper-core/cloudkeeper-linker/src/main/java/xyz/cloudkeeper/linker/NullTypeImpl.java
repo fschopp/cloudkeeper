@@ -3,11 +3,11 @@ package xyz.cloudkeeper.linker;
 import xyz.cloudkeeper.model.bare.type.BareTypeMirrorVisitor;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
+import java.util.Collection;
 import javax.annotation.Nullable;
 import javax.lang.model.type.NullType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeVisitor;
-import java.util.Collection;
 
 final class NullTypeImpl extends TypeMirrorImpl implements NullType {
     NullTypeImpl(CloudKeeperTypeReflection types) {
@@ -50,7 +50,7 @@ final class NullTypeImpl extends TypeMirrorImpl implements NullType {
     void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    void finishTypeMirror(FinishContext context) { }
+    void preProcessTypeMirror(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

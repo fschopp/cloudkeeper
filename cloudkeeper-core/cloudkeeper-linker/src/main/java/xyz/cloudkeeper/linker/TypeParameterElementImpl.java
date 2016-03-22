@@ -70,9 +70,9 @@ final class TypeParameterElementImpl
 
     @Override
     public Name getQualifiedName() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable Name localQualifiedName = qualifiedName;
-        assert localQualifiedName != null : "must be non-null when finished";
+        assert localQualifiedName != null : "must be non-null when in state " + State.LINKED;
         return localQualifiedName;
     }
 
@@ -94,9 +94,9 @@ final class TypeParameterElementImpl
 
     @Override
     public IParameterizableImpl getGenericElement() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable IParameterizableImpl localGenericDeclaration = genericDeclaration;
-        assert localGenericDeclaration != null : "must be non-null when finished";
+        assert localGenericDeclaration != null : "must be non-null when in state " + State.LINKED;
         return localGenericDeclaration;
     }
 
@@ -107,9 +107,9 @@ final class TypeParameterElementImpl
 
     @Override
     public TypeVariableImpl asType() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable TypeVariableImpl localType = type;
-        assert localType != null : "must be non-null when finished";
+        assert localType != null : "must be non-null when in state " + State.LINKED;
         return localType;
     }
 
@@ -125,10 +125,7 @@ final class TypeParameterElementImpl
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
-
-    @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
+    void preProcessFreezable(FinishContext context) throws LinkerException {
         IParameterizableImpl localGenericDeclaration
             = context.getRequiredEnclosingFreezable(IParameterizableImpl.class);
         genericDeclaration = localGenericDeclaration;
@@ -146,6 +143,12 @@ final class TypeParameterElementImpl
         type = new TypeVariableImpl(types, this, null)
             .setUpperAndLowerBounds(extendsBound, types.getNullType());
     }
+
+    @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
+    void finishFreezable(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

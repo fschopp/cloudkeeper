@@ -19,7 +19,7 @@ public interface BareModuleDeclaration extends BarePluginDeclaration {
      * Returns the module of this declaration.
      */
     @Nullable
-    BareDeclarableModule getTemplate();
+    BareModule getTemplate();
 
     /**
      * Default implementations for standard methods.

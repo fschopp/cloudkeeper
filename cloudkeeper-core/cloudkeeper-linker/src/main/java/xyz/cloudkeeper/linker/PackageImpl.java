@@ -81,9 +81,9 @@ final class PackageImpl extends AnnotatedConstructImpl implements RuntimePackage
 
     @Override
     public URI getBundleIdentifier() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable URI localBundleIdentifier = bundleIdentifier;
-        assert localBundleIdentifier != null : "must be non-null when finished";
+        assert localBundleIdentifier != null : "must be non-null when in state " + State.LINKED;
         return localBundleIdentifier;
     }
 
@@ -93,12 +93,15 @@ final class PackageImpl extends AnnotatedConstructImpl implements RuntimePackage
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
-
-    @Override
-    void finishFreezable(FinishContext context) {
+    void preProcessFreezable(FinishContext context) {
         bundleIdentifier = context.getRequiredEnclosingFreezable(BundleImpl.class).getBundleIdentifier();
     }
+
+    @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
+    void finishFreezable(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

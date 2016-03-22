@@ -3,7 +3,6 @@ package xyz.cloudkeeper.linker.examples;
 import xyz.cloudkeeper.model.beans.element.module.MutableInPort;
 import xyz.cloudkeeper.model.beans.element.module.MutableModuleDeclaration;
 import xyz.cloudkeeper.model.beans.element.module.MutableOutPort;
-import xyz.cloudkeeper.model.beans.element.module.MutablePort;
 import xyz.cloudkeeper.model.beans.element.module.MutableSimpleModule;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 
@@ -17,7 +16,8 @@ public final class GreaterThan {
             .setSimpleName(GreaterThan.class.getSimpleName())
             .setTemplate(
                 new MutableSimpleModule()
-                    .setDeclaredPorts(Arrays.<MutablePort<?>>asList(
+                    .setDefinition("x-example:" + GreaterThan.class.getName())
+                    .setDeclaredPorts(Arrays.asList(
                         new MutableInPort()
                             .setSimpleName("num1")
                             .setType(MutableDeclaredType.fromType(Integer.class)),

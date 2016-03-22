@@ -78,7 +78,7 @@ final class AnnotationTypeDeclarationImpl extends PluginDeclarationImpl implemen
     }
 
     @Override
-    void finishFreezable(FinishContext context) { }
+    void preProcessPluginDeclaration(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

@@ -10,14 +10,6 @@ import xyz.cloudkeeper.model.runtime.element.RuntimePluginDeclarationVisitor;
 import xyz.cloudkeeper.model.runtime.element.type.RuntimeTypeDeclaration;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ElementVisitor;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.NestingKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ElementVisitor;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 
 final class TypeDeclarationImpl
         extends PluginDeclarationImpl
@@ -91,7 +91,7 @@ final class TypeDeclarationImpl
 
     @Override
     public TypeDeclarationImpl getSuperAnnotatedConstruct() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable TypeMirrorImpl localSuperclass = superclass;
         assert (localSuperclass instanceof DeclaredTypeImpl) || (localSuperclass instanceof NoTypeImpl);
         return localSuperclass instanceof DeclaredTypeImpl
@@ -136,15 +136,15 @@ final class TypeDeclarationImpl
     @Override
     @Nonnull
     public ITypeElementImpl getEnclosingElement() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable TypeDeclarationImpl localEnclosingTypeDeclaration = enclosingTypeDeclaration;
-        assert localEnclosingTypeDeclaration != null : "must be non-null when finished";
+        assert localEnclosingTypeDeclaration != null : "must be non-null when in state " + State.LINKED;
         return localEnclosingTypeDeclaration;
     }
 
     @Override
     public NestingKind getNestingKind() {
-        require(State.FINISHED);
+        require(State.LINKED);
         boolean isTopLevel = enclosingTypeDeclaration == null;
         return isTopLevel
             ? NestingKind.TOP_LEVEL
@@ -153,9 +153,9 @@ final class TypeDeclarationImpl
 
     @Override
     public DeclaredTypeImpl asType() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable CloudKeeperTypeReflection localTypes = types;
-        assert localTypes != null : "must be non-null when finished";
+        assert localTypes != null : "must be non-null when in state " + State.LINKED;
 
         // No synchronization/volatile needed because reference read/writes are atomic due to JLS §17.7.
         @Nullable DeclaredTypeImpl localType = type;
@@ -200,7 +200,7 @@ final class TypeDeclarationImpl
 
     @Override
     public TypeMirrorImpl getSuperclass() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable TypeMirrorImpl localSuperClass = superclass;
         assert localSuperClass != null;
         return localSuperClass;
@@ -223,7 +223,7 @@ final class TypeDeclarationImpl
 
     @Override
     public Class<?> toClass() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable Class<?> localTypeClass = typeClass;
         if (localTypeClass == null) {
             throw new IllegalStateException(String.format(
@@ -246,7 +246,7 @@ final class TypeDeclarationImpl
     }
 
     @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
+    void preProcessPluginDeclaration(FinishContext context) throws LinkerException {
         CloudKeeperTypeReflection localTypes = context.getTypes();
         types = localTypes;
         enclosingTypeDeclaration = context.getOptionalEnclosingFreezable(TypeDeclarationImpl.class).orElse(null);

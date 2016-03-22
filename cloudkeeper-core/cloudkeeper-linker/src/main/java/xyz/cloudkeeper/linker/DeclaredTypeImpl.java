@@ -8,21 +8,21 @@ import xyz.cloudkeeper.model.bare.type.BareTypeMirrorVisitor;
 import xyz.cloudkeeper.model.runtime.type.RuntimeDeclaredType;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeVisitor;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nullable;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeVisitor;
 
 final class DeclaredTypeImpl extends TypeMirrorImpl implements RuntimeDeclaredType, DeclaredType {
     private final TypeMirrorImpl enclosingType;
     @Nullable private final NameReference typeDeclarationReference;
     private final ImmutableList<TypeMirrorImpl> typeArguments;
 
-    private TypeDeclarationImpl declaration;
+    @Nullable private volatile TypeDeclarationImpl declaration;
     @Nullable private ImmutableList<TypeDeclarationImpl> typeDeclarations;
 
     DeclaredTypeImpl(CloudKeeperTypeReflection types, TypeMirrorImpl enclosingType,
@@ -63,15 +63,17 @@ final class DeclaredTypeImpl extends TypeMirrorImpl implements RuntimeDeclaredTy
             return false;
         }
 
-        require(State.FINISHED);
+        require(State.LINKED);
         DeclaredTypeImpl other = (DeclaredTypeImpl) otherObject;
-        return declaration.equals(other.declaration)
+        @Nullable TypeDeclarationImpl localDeclaration = declaration;
+        assert localDeclaration != null : "must be non-null when in state " + State.LINKED;
+        return localDeclaration.equals(other.declaration)
             && typeArguments.equals(other.typeArguments);
     }
 
     @Override
     public int hashCode() {
-        require(State.FINISHED);
+        require(State.LINKED);
         return Objects.hash(declaration, typeArguments);
     }
 
@@ -89,7 +91,7 @@ final class DeclaredTypeImpl extends TypeMirrorImpl implements RuntimeDeclaredTy
 
     @Override
     public ImmutableList<TypeDeclarationImpl> asTypeDeclaration() {
-        require(State.FINISHED);
+        require(State.LINKED);
 
         // No synchronization/volatile needed because reference read/writes are atomic due to JLS §17.7.
         @Nullable ImmutableList<TypeDeclarationImpl> localTypeDeclarations = typeDeclarations;
@@ -112,14 +114,15 @@ final class DeclaredTypeImpl extends TypeMirrorImpl implements RuntimeDeclaredTy
 
     @Override
     public TypeDeclarationImpl getDeclaration() {
-        require(State.FINISHED);
-        return declaration;
+        require(State.LINKED);
+        @Nullable TypeDeclarationImpl localDeclaration = declaration;
+        assert localDeclaration != null : "must be non-null when in state " + State.LINKED;
+        return localDeclaration;
     }
 
     @Override
     public TypeDeclarationImpl asElement() {
-        require(State.FINISHED);
-        return declaration;
+        return getDeclaration();
     }
 
     @Override
@@ -141,8 +144,8 @@ final class DeclaredTypeImpl extends TypeMirrorImpl implements RuntimeDeclaredTy
     }
 
     @Override
-    void finishTypeMirror(FinishContext context) throws LinkerException {
-        assert typeDeclarationReference != null;
+    void preProcessTypeMirror(FinishContext context) throws LinkerException {
+        assert typeDeclarationReference != null : "must be non-null if created unfinished";
         declaration
             = context.getDeclaration(BareTypeDeclaration.NAME, TypeDeclarationImpl.class, typeDeclarationReference);
     }

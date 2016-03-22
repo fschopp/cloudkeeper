@@ -35,4 +35,9 @@ final class CompositeModuleImpl extends ParentModuleImpl implements RuntimeCompo
 
     @Override
     void collectEnclosedByParentModule(Collection<AbstractFreezable> freezables) { }
+
+    @Override
+    public CompositeModuleImpl resolveInvocations() {
+        return this;
+    }
 }

@@ -32,7 +32,7 @@ final class AnnotationEntryImpl
             return false;
         }
 
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable AnnotationTypeElementImpl localKey = key;
         assert localKey != null : "must be non-null when finished";
 
@@ -56,9 +56,9 @@ final class AnnotationEntryImpl
 
     @Override
     public AnnotationTypeElementImpl getKey() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable AnnotationTypeElementImpl localKey = key;
-        assert localKey != null : "must be non-null when finished";
+        assert localKey != null : "must be non-null when in state " + State.LINKED;
         return localKey;
     }
 
@@ -86,12 +86,15 @@ final class AnnotationEntryImpl
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
-
-    @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
+    void preProcessFreezable(FinishContext context) throws LinkerException {
         key = context.getAnnotationTypeElement(keyReference);
     }
+
+    @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
+    void finishFreezable(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

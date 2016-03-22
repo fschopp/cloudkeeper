@@ -12,7 +12,6 @@ import xyz.cloudkeeper.model.immutable.element.Key;
 import xyz.cloudkeeper.model.immutable.element.Name;
 import xyz.cloudkeeper.model.immutable.element.SimpleName;
 import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
-import xyz.cloudkeeper.model.runtime.element.module.RuntimeDeclaredPortsModule;
 import xyz.cloudkeeper.model.runtime.execution.IllegalExecutionTraceException;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeAnnotatedExecutionTrace;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeElementPatternTarget;
@@ -24,7 +23,6 @@ import xyz.cloudkeeper.model.runtime.execution.RuntimeExecutionTraceVisitor;
 import xyz.cloudkeeper.model.runtime.execution.RuntimeOverrideTargetVisitor;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements RuntimeAnnotatedExecutionTrace {
     private final ExecutionTrace executionTrace;
@@ -341,7 +340,7 @@ final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements Run
 
     @Override
     public ImmutableList<SerializationDeclarationImpl> getSerializationDeclarations() {
-        require(State.FINISHED);
+        require(State.LINKED);
         if (executionTrace.getReference().asElementList().isEmpty()) {
             throw new IllegalStateException(String.format(
                 "getSerializationDeclarations() called for execution trace '%s', which does not contain a port.",
@@ -384,18 +383,15 @@ final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements Run
 
     @Override
     public AnnotatedExecutionTraceImpl resolveModule(SimpleName moduleName) {
-        require(State.FINISHED);
+        require(State.LINKED);
         ExecutionTrace newExecutionTrace = executionTrace.resolveModule(moduleName);
 
         @Nullable ParentModuleImpl parentModule = null;
-        if (element instanceof InvokeModuleImpl) {
-            ModuleDeclarationImpl declaration = ((InvokeModuleImpl) element).getDeclaration();
-            RuntimeDeclaredPortsModule template = declaration.getTemplate();
-            if (template instanceof ParentModuleImpl) {
-                parentModule = (ParentModuleImpl) template;
+        if (element instanceof ModuleImpl) {
+            ModuleImpl resolvedModule = ((ModuleImpl) element).resolveInvocations();
+            if (resolvedModule instanceof ParentModuleImpl) {
+                parentModule = (ParentModuleImpl) resolvedModule;
             }
-        } else if (element instanceof ParentModuleImpl) {
-            parentModule = (ParentModuleImpl) element;
         }
 
         if (parentModule == null) {
@@ -418,21 +414,21 @@ final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements Run
 
     @Override
     public AnnotatedExecutionTraceImpl resolveIteration(Index index) {
-        require(State.FINISHED);
+        require(State.LINKED);
         return new AnnotatedExecutionTraceImpl(executionTrace.resolveIteration(index), element, overrides,
             defaultSerializationDeclarations);
     }
 
     @Override
     public AnnotatedExecutionTraceImpl resolveContent() {
-        require(State.FINISHED);
+        require(State.LINKED);
         return new AnnotatedExecutionTraceImpl(executionTrace.resolveContent(), element, overrides,
             defaultSerializationDeclarations);
     }
 
     @Override
     public AnnotatedExecutionTraceImpl resolveInPort(SimpleName inPortName) {
-        require(State.FINISHED);
+        require(State.LINKED);
         ExecutionTrace newExecutionTrace = executionTrace.resolveInPort(inPortName);
 
         ModuleImpl module = (ModuleImpl) element;
@@ -450,7 +446,7 @@ final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements Run
 
     @Override
     public AnnotatedExecutionTraceImpl resolveOutPort(SimpleName outPortName) {
-        require(State.FINISHED);
+        require(State.LINKED);
         ExecutionTrace newExecutionTrace = executionTrace.resolveOutPort(outPortName);
 
         ModuleImpl module = (ModuleImpl) element;
@@ -468,7 +464,7 @@ final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements Run
 
     @Override
     public AnnotatedExecutionTraceImpl resolveArrayIndex(Index index) {
-        require(State.FINISHED);
+        require(State.LINKED);
         return new AnnotatedExecutionTraceImpl(executionTrace.resolveArrayIndex(index), element, overrides,
             defaultSerializationDeclarations);
     }
@@ -530,12 +526,15 @@ final class AnnotatedExecutionTraceImpl extends AbstractFreezable implements Run
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
-
-    @Override
-    void finishFreezable(FinishContext context) {
+    void preProcessFreezable(FinishContext context) {
         defaultSerializationDeclarations = context.getDefaultSerializationDeclarations();
     }
+
+    @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
+    void finishFreezable(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

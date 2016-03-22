@@ -22,6 +22,7 @@ import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.immutable.execution.ExecutionTrace;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
 import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleDeclaration;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,8 +67,8 @@ public class LinkerTest {
 
     @Test(dependsOnMethods = "dependentRepositoryTest")
     public void annotationTest() {
-        RuntimeSimpleModuleDeclaration declaration =
-            fibRepository.getElement(RuntimeSimpleModuleDeclaration.class, qualifiedName(BinarySum.class.getName()));
+        RuntimeModuleDeclaration declaration =
+            fibRepository.getElement(RuntimeModuleDeclaration.class, qualifiedName(BinarySum.class.getName()));
         Memory memoryAnnotation = declaration.getDeclaredAnnotations().get(0).getJavaAnnotation(Memory.class);
         Memory originalAnnotation = BinarySum.class.getAnnotation(Memory.class);
 

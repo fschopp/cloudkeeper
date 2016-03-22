@@ -19,6 +19,8 @@ import xyz.cloudkeeper.model.beans.element.module.MutablePort;
 import xyz.cloudkeeper.model.beans.element.module.MutableInvokeModule;
 import xyz.cloudkeeper.model.beans.type.MutableDeclaredType;
 import xyz.cloudkeeper.model.runtime.element.RuntimeRepository;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeCompositeModule;
+import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleDeclaration;
 
 import javax.annotation.Nullable;
 import java.net.URI;
@@ -100,19 +102,19 @@ public class CyclicReferenceTest {
         RuntimeRepository repository
             = Linker.createRepository(Collections.singletonList(mutableBundle), LinkerOptions.nonExecutable());
 
-        @Nullable RuntimeCompositeModuleDeclaration composite1Decl
-            = repository.getElement(RuntimeCompositeModuleDeclaration.class, qualifiedName("test.Composite1"));
-        @Nullable RuntimeCompositeModuleDeclaration composite2Decl
-            = repository.getElement(RuntimeCompositeModuleDeclaration.class, qualifiedName("test.Composite2"));
-        Assert.assertTrue(composite1Decl.getTemplate() != null);
-        Assert.assertTrue(composite2Decl.getTemplate() != null);
+        @Nullable RuntimeModuleDeclaration composite1Decl
+            = repository.getElement(RuntimeModuleDeclaration.class, qualifiedName("test.Composite1"));
+        @Nullable RuntimeModuleDeclaration composite2Decl
+            = repository.getElement(RuntimeModuleDeclaration.class, qualifiedName("test.Composite2"));
+        RuntimeCompositeModule composite1 = (RuntimeCompositeModule) composite1Decl.getTemplate();
+        RuntimeCompositeModule composite2 = (RuntimeCompositeModule) composite2Decl.getTemplate();
 
         Assert.assertSame(
-            ((BareInvokeModule) composite1Decl.getTemplate().getModule(identifier("f"))).getDeclaration(),
+            ((BareInvokeModule) composite1.getModule(identifier("f"))).getDeclaration(),
             composite2Decl
         );
         Assert.assertSame(
-            ((BareInvokeModule) composite2Decl.getTemplate().getModule(identifier("g"))).getDeclaration(),
+            ((BareInvokeModule) composite2.getModule(identifier("g"))).getDeclaration(),
             composite1Decl
         );
     }

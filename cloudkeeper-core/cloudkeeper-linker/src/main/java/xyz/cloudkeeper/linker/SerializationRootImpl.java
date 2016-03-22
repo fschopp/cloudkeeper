@@ -69,9 +69,9 @@ final class SerializationRootImpl extends SerializationNodeImpl implements Runti
 
     @Override
     public RuntimeSerializationDeclaration getDeclaration() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable RuntimeSerializationDeclaration localSerializationDeclaration = serializationDeclaration;
-        assert localSerializationDeclaration != null : "must be non-null when finished";
+        assert localSerializationDeclaration != null : "must be non-null when in state " + State.LINKED;
         return localSerializationDeclaration;
     }
 
@@ -81,7 +81,7 @@ final class SerializationRootImpl extends SerializationNodeImpl implements Runti
     }
 
     @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
+    void preProcessFreezable(FinishContext context) throws LinkerException {
         assert serializationReference != null : "must be non-null if created unfinished";
         serializationDeclaration = context.getDeclaration(
             BareSerializationDeclaration.NAME, SerializationDeclarationImpl.class, serializationReference);

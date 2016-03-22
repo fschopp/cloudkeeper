@@ -7,19 +7,21 @@ import xyz.cloudkeeper.model.beans.element.MutablePluginDeclaration;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "module-declaration")
 public final class MutableModuleDeclaration
         extends MutablePluginDeclaration<MutableModuleDeclaration>
         implements BareModuleDeclaration {
     private static final long serialVersionUID = -3405633500476304133L;
 
-    @Nullable private MutableDeclarableModule<?> template;
+    @Nullable private MutableModule<?> template;
 
     public MutableModuleDeclaration() { }
 
     private MutableModuleDeclaration(BareModuleDeclaration original, CopyOption[] copyOptions) {
         super(original, copyOptions);
-        template = (MutableDeclarableModule<?>) MutableModule.copyOfModule(original.getTemplate(), copyOptions);
+        template = MutableModule.copyOfModule(original.getTemplate(), copyOptions);
     }
 
     @Nullable
@@ -49,11 +51,11 @@ public final class MutableModuleDeclaration
     @XmlElement
     @Override
     @Nullable
-    public MutableDeclarableModule<?> getTemplate() {
+    public MutableModule<?> getTemplate() {
         return template;
     }
 
-    public MutableModuleDeclaration setTemplate(@Nullable MutableDeclarableModule<?> template) {
+    public MutableModuleDeclaration setTemplate(@Nullable MutableModule<?> template) {
         this.template = template;
         return this;
     }

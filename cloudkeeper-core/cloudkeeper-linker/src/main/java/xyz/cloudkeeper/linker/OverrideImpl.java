@@ -40,6 +40,9 @@ final class OverrideImpl extends AnnotatedConstructImpl implements RuntimeOverri
     void preProcessFreezable(FinishContext context) { }
 
     @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
     void finishFreezable(FinishContext context) { }
 
     @Override

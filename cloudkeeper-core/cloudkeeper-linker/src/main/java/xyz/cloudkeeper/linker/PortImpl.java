@@ -37,8 +37,8 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
     private final List<ConnectionImpl> inConnections = new ArrayList<>();
     private final List<ConnectionImpl> outConnections = new ArrayList<>();
 
-    @Nullable private ModuleImpl enclosingElement;
-    private Name qualifiedName;
+    @Nullable private volatile ModuleImpl enclosingElement;
+    @Nullable private volatile Name qualifiedName;
 
     /**
      * Constructor for instance that does not own the given type. Instance needs to be explicitly frozen before use.
@@ -129,8 +129,9 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
     @Nonnull
     public final ModuleImpl getEnclosingElement() {
         require(State.LINKED);
-        assert enclosingElement != null : "must be non-null when in state " + State.LINKED;
-        return enclosingElement;
+        @Nullable ModuleImpl localEnclosingElement = enclosingElement;
+        assert localEnclosingElement != null : "must be non-null when in state " + State.LINKED;
+        return localEnclosingElement;
     }
 
     @Override
@@ -146,7 +147,9 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
     @Override
     public final Name getQualifiedName() {
         require(State.FINISHED);
-        return qualifiedName;
+        @Nullable Name localName = qualifiedName;
+        assert localName != null : "must be non-null when in state " + State.LINKED;
+        return localName;
     }
 
     @Override
@@ -161,9 +164,7 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
 
     @Override
     public final ModuleImpl getModule() {
-        require(State.LINKED);
-        assert enclosingElement != null : "must be non-null when in state " + State.LINKED;
-        return (ModuleImpl) enclosingElement;
+        return getEnclosingElement();
     }
 
     @Override
@@ -210,15 +211,17 @@ abstract class PortImpl extends AnnotatedConstructImpl implements IPortImpl, IEl
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) {
-        enclosingElement = context.getRequiredEnclosingFreezable(ModuleImpl.class);
+    final void preProcessFreezable(FinishContext context) {
+        ModuleImpl localEnclosingElement = context.getRequiredEnclosingFreezable(ModuleImpl.class);
+        enclosingElement = localEnclosingElement;
+        qualifiedName = localEnclosingElement.getQualifiedName().join(simpleName);
     }
 
     @Override
-    final void finishFreezable(FinishContext context) {
-        assert enclosingElement != null : "must be non-null when in state " + State.LINKED;
-        qualifiedName = enclosingElement.getQualifiedName().join(simpleName);
-    }
+    final void augmentFreezable(FinishContext context) { }
+
+    @Override
+    final void finishFreezable(FinishContext context) { }
 
     /**
      * Verify port.

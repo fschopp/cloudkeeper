@@ -25,7 +25,7 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
     private final NameReference declarationReference;
     private final Map<SimpleName, AnnotationEntryImpl> entriesMap;
 
-    @Nullable private AnnotationTypeDeclarationImpl annotationTypeDeclaration;
+    @Nullable private volatile AnnotationTypeDeclarationImpl annotationTypeDeclaration;
     @Nullable private volatile Annotation javaAnnotation;
 
     AnnotationImpl(BareAnnotation original, CopyContext parentContext) throws LinkerException {
@@ -45,9 +45,10 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
     @Override
     @Nonnull
     public AnnotationTypeDeclarationImpl getDeclaration() {
-        require(State.FINISHED);
-        assert annotationTypeDeclaration != null : "must be non-null when in state " + State.FINISHED;
-        return annotationTypeDeclaration;
+        require(State.LINKED);
+        @Nullable AnnotationTypeDeclarationImpl localDeclaration = annotationTypeDeclaration;
+        assert localDeclaration != null : "must be non-null when in state " + State.LINKED;
+        return localDeclaration;
     }
 
     @Override
@@ -58,14 +59,15 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
     @Override
     @Nullable
     public AnnotationValueImpl getValue(SimpleName name) {
-        require(State.FINISHED);
-        assert annotationTypeDeclaration != null : "must be non-null when finished";
+        require(State.LINKED);
+        @Nullable AnnotationTypeDeclarationImpl localDeclaration = annotationTypeDeclaration;
+        assert localDeclaration != null : "must be non-null when in state " + State.LINKED;
 
         @Nullable AnnotationEntryImpl entry = entriesMap.get(name);
         @Nullable AnnotationValueImpl value;
         if (entry == null) {
             @Nullable AnnotationTypeElementImpl annotationTypeElement
-                = annotationTypeDeclaration.getEnclosedElement(AnnotationTypeElementImpl.class, name);
+                = localDeclaration.getEnclosedElement(AnnotationTypeElementImpl.class, name);
             value = annotationTypeElement == null
                 ? null
                 : annotationTypeElement.getDefaultValue();
@@ -83,10 +85,11 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
     @Override
     public <T extends Annotation> T getJavaAnnotation(Class<T> annotationClass) {
         Objects.requireNonNull(annotationClass);
-        require(State.FINISHED);
-        assert annotationTypeDeclaration != null : "must be non-null when finished";
+        require(State.LINKED);
+        @Nullable AnnotationTypeDeclarationImpl localDeclaration = annotationTypeDeclaration;
+        assert localDeclaration != null : "must be non-null when in state " + State.LINKED;
 
-        Name expectedName = annotationTypeDeclaration.getQualifiedName();
+        Name expectedName = localDeclaration.getQualifiedName();
         if (!annotationClass.getName().contentEquals(expectedName)) {
             throw new IllegalArgumentException(String.format(
                 "Expected class with name '%s', but got %s.", expectedName, annotationClass
@@ -116,14 +119,23 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
-
-    @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
+    void preProcessFreezable(FinishContext context) throws LinkerException {
         annotationTypeDeclaration = context.getDeclaration(
             BareAnnotationTypeDeclaration.NAME, AnnotationTypeDeclarationImpl.class, declarationReference);
+    }
 
-        for (AnnotationTypeElementImpl element: annotationTypeDeclaration.getElements()) {
+    @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
+    void finishFreezable(FinishContext context) { }
+
+    @Override
+    void verifyFreezable(VerifyContext context) throws LinkerException {
+        @Nullable AnnotationTypeDeclarationImpl localDeclaration = annotationTypeDeclaration;
+        assert localDeclaration != null : "must be non-null when in state " + State.LINKED;
+
+        for (AnnotationTypeElementImpl element: localDeclaration.getElements()) {
             Preconditions.requireCondition(
                 element.getDefaultValue() != null || entriesMap.get(element.getSimpleName()) != null,
                 getCopyContext(),
@@ -133,10 +145,7 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
         }
     }
 
-    @Override
-    void verifyFreezable(VerifyContext context) { }
-
-    final class AnnotationInvocationHandler implements InvocationHandler {
+    private final class AnnotationInvocationHandler implements InvocationHandler {
         private final Class<? extends Annotation> annotationClass;
 
         AnnotationInvocationHandler(Class<? extends Annotation> annotationClass) {
@@ -170,7 +179,7 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
             return true;
         }
 
-        public int proxyHashCode() {
+        private int proxyHashCode() {
             int hashCode = 0;
             for (AnnotationEntryImpl element: entriesMap.values()) {
                 hashCode += element.hashCode();
@@ -179,11 +188,12 @@ final class AnnotationImpl extends LocatableImpl implements RuntimeAnnotation {
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) {
+        public Object invoke(Object proxy, Method method, @Nullable Object[] args) {
             final String name = method.getName();
             final int numArguments = method.getParameterTypes().length;
 
             if ("equals".equals(name) && numArguments == 1) {
+                assert args != null;
                 return isProxyEqualToAnnotation(proxy, (Annotation) args[0]);
             } else if ("annotationType".equals(name) && numArguments == 0) {
                 return annotationClass;

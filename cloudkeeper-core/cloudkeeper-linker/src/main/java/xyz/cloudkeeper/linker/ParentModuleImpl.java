@@ -153,6 +153,9 @@ abstract class ParentModuleImpl extends ModuleImpl implements RuntimeParentModul
     }
 
     @Override
+    public abstract ParentModuleImpl resolveInvocations();
+
+    @Override
     final void collectEnclosedByAnnotatedConstruct(Collection<AbstractFreezable> freezables) {
         freezables.addAll(declaredPorts);
         freezables.addAll(modules);
@@ -166,11 +169,11 @@ abstract class ParentModuleImpl extends ModuleImpl implements RuntimeParentModul
     abstract void collectEnclosedByParentModule(Collection<AbstractFreezable> freezables);
 
     @Override
-    final void preProcessFreezable(FinishContext context) { }
+    final void preProcessModule(FinishContext context) { }
 
     @Override
-    final void finishModule(FinishContext context) { }
+    final void augmentFreezable(FinishContext context) { }
 
     @Override
-    final void verifyFreezable(VerifyContext context) { }
+    final void verifyModule(VerifyContext context) { }
 }

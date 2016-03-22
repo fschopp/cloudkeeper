@@ -76,6 +76,9 @@ final class BundleImpl extends LocatableImpl implements RuntimeBundle, ElementRe
     void preProcessFreezable(FinishContext context) { }
 
     @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
     void finishFreezable(FinishContext context) { }
 
     @Override

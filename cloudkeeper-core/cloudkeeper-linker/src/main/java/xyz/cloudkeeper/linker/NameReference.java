@@ -37,6 +37,9 @@ final class NameReference extends LocatableImpl implements BareQualifiedNameable
     void preProcessFreezable(FinishContext context) { }
 
     @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
     void finishFreezable(FinishContext context) { }
 
     @Override

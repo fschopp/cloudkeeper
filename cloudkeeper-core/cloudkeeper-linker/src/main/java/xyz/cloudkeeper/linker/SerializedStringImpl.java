@@ -40,5 +40,5 @@ final class SerializedStringImpl extends SerializationNodeImpl implements Runtim
     void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    void finishFreezable(FinishContext context) { }
+    void preProcessFreezable(FinishContext context) { }
 }

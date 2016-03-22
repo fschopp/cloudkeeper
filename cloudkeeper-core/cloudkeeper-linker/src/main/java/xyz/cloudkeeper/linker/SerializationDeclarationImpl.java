@@ -12,8 +12,8 @@ import xyz.cloudkeeper.model.runtime.element.RuntimePluginDeclarationVisitor;
 import xyz.cloudkeeper.model.runtime.element.serialization.RuntimeSerializationDeclaration;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
+import javax.annotation.Nullable;
 
 final class SerializationDeclarationImpl extends PluginDeclarationImpl implements RuntimeSerializationDeclaration {
     @Nullable private volatile Marshaler<?> marshaler;
@@ -61,7 +61,7 @@ final class SerializationDeclarationImpl extends PluginDeclarationImpl implement
 
     @Override
     public Marshaler<?> getInstance() {
-        require(State.FINISHED);
+        require(State.LINKED);
         @Nullable Marshaler<?> localMarshalerInstance = marshaler;
         assert localMarshalerInstance != null;
         return localMarshalerInstance;
@@ -101,7 +101,7 @@ final class SerializationDeclarationImpl extends PluginDeclarationImpl implement
     }
 
     @Override
-    void finishFreezable(FinishContext context) throws LinkerException {
+    void preProcessPluginDeclaration(FinishContext context) throws LinkerException {
         @SuppressWarnings("unchecked")
         Class<Marshaler<?>> serializationInterface = (Class<Marshaler<?>>) (Class<?>) Marshaler.class;
         @Nullable Marshaler<?> newMarshaler = context.instanceOfJavaClass(this, serializationInterface);

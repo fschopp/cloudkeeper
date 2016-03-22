@@ -11,9 +11,9 @@ import xyz.cloudkeeper.model.runtime.element.module.RuntimeModuleVisitor;
 import xyz.cloudkeeper.model.runtime.type.RuntimeTypeMirror;
 import xyz.cloudkeeper.model.util.ImmutableList;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
  * An input module is specified by an object-store key or content specified inline.
@@ -24,8 +24,8 @@ final class InputModuleImpl extends ModuleImpl implements RuntimeInputModule {
     private final PortImpl.OutPortImpl outPort;
 
     private final boolean rawLifecycleReponsible;
-    @Nullable private SerializationRootImpl raw;
-    @Nullable private Object value;
+    @Nullable private volatile SerializationRootImpl raw;
+    @Nullable private volatile Object value;
 
     InputModuleImpl(BareInputModule original, CopyContext parentContext, int index) throws LinkerException {
         super(original, parentContext, index);
@@ -119,13 +119,20 @@ final class InputModuleImpl extends ModuleImpl implements RuntimeInputModule {
     @Override
     @Nullable
     public Object getValue() {
+        require(State.PRECOMPUTED);
         return value;
     }
 
     @Override
     @Nullable
     public SerializationRootImpl getRaw() {
+        require(State.PRECOMPUTED);
         return raw;
+    }
+
+    @Override
+    public InputModuleImpl resolveInvocations() {
+        return this;
     }
 
     @Override
@@ -138,20 +145,21 @@ final class InputModuleImpl extends ModuleImpl implements RuntimeInputModule {
     }
 
     @Override
-    void preProcessFreezable(FinishContext context) { }
+    void preProcessModule(FinishContext context) { }
 
     @Override
-    void finishModule(FinishContext context) { }
+    void augmentFreezable(FinishContext context) { }
 
     @Override
-    void verifyFreezable(VerifyContext context) throws LinkerException {
+    void verifyModule(VerifyContext context) throws LinkerException {
         CopyContext copyContext = getCopyContext();
         Preconditions.requireCondition(value != null || raw != null, copyContext,
             "Expected either value or raw to be non-null");
 
         if (value == null) {
-            assert raw != null;
-            value = context.valueFromSerializationTree(raw);
+            @Nullable SerializationRootImpl localRaw = raw;
+            assert localRaw != null;
+            value = context.valueFromSerializationTree(localRaw);
         } else if (raw == null) {
             assert value != null;
             raw = context.serializationTreeFromValue(this);

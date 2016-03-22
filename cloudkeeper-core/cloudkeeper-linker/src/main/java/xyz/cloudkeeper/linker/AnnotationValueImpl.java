@@ -251,6 +251,9 @@ final class AnnotationValueImpl extends AbstractFreezable implements RuntimeAnno
     void preProcessFreezable(FinishContext context) { }
 
     @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
     void finishFreezable(FinishContext context) throws LinkerException {
         element = context.getElement(this);
     }

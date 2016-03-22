@@ -94,6 +94,9 @@ final class RepositoryImpl extends AbstractFreezable implements RuntimeRepositor
     void preProcessFreezable(FinishContext context) { }
 
     @Override
+    void augmentFreezable(FinishContext context) { }
+
+    @Override
     void finishFreezable(FinishContext context) { }
 
     @Override

@@ -82,7 +82,7 @@ final class ArrayTypeImpl extends TypeMirrorImpl implements RuntimeArrayType, Ar
     }
 
     @Override
-    void finishTypeMirror(FinishContext context) { }
+    void preProcessTypeMirror(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

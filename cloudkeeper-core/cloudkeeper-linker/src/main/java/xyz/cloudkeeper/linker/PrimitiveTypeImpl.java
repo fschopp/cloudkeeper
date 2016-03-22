@@ -101,7 +101,7 @@ final class PrimitiveTypeImpl extends TypeMirrorImpl implements RuntimePrimitive
     void collectEnclosed(Collection<AbstractFreezable> freezables) { }
 
     @Override
-    void finishTypeMirror(FinishContext context) { }
+    void preProcessTypeMirror(FinishContext context) { }
 
     @Override
     void verifyFreezable(VerifyContext context) { }

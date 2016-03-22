@@ -58,4 +58,11 @@ public final class MutableSimpleModule
         this.definition = definition;
         return this;
     }
+
+    public MutableSimpleModule setDefinition(String definition) {
+        return setDefinition(
+            new MutableReferenceable()
+                .setURI(definition)
+        );
+    }
 }

@@ -7,4 +7,7 @@ import xyz.cloudkeeper.model.bare.element.module.BareCompositeModule;
  *
  * This interface models a composite module as part of an optimized abstract syntax tree with runtime state information.
  */
-public interface RuntimeCompositeModule extends RuntimeParentModule, BareCompositeModule { }
+public interface RuntimeCompositeModule extends RuntimeParentModule, BareCompositeModule {
+    @Override
+    RuntimeCompositeModule resolveInvocations();
+}
